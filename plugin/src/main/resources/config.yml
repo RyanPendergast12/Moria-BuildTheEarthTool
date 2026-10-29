@@ -26,3 +26,11 @@ max-active-jobs: 3
 cooldown-ms: 3000
 # Delay between planning and the first applied batch (test hook for "edit between planning and apply"); 0-1 in normal use.
 apply-delay-ticks: 1
+# v0.4 pilot: grade-separated crossings (/shelltool content overpass). OFF by default; only the listed crossings.
+overpass-enabled: false
+overpass-crossings:
+  - x_w234014889_w234014891   # W Charleston Blvd over CC-215 (pilot)
+# Inferred piers (no measured layout): off until there is supporting evidence.
+overpass-piers: false
+# Raised approaches onto enabled decks (fill, retaining walls, raised intersections): 0 = not authorized. Allowed 0.04-0.10.
+overpass-approach-grade: 0

@@ -1,6 +1,10 @@
 # Roadmap: from "works in Las Vegas" to "works for any BTE team"
 
-## v0.4 – portable (no source edits needed)
+## Done in v0.4.x
+- [x] Grade-separated crossings: a measured deck fitted to the world, raised approaches, chunk-safe planning (v0.4.0–v0.4.2).
+- [x] One snowball workflow: roads/both include enabled crossings; independent preparation pipelines (v0.4.1).
+
+## v0.5 – portable (no source edits needed)
 - [ ] One config for everything: move every hard-coded path into `config.yml`, and have the plugin pass them to the prep worker. These are:
   - the OSM index;
   - the protected-zone polygons;
@@ -15,7 +19,7 @@
 - [ ] `requirements.txt` and a one-click `setup.bat` / `setup.sh`.
 - [ ] Use the permissions plugin when one is present (LuckPerms nodes), alongside `allowed-players`.
 
-## v0.5 – easy install
+## v0.6 – easy install
 - [ ] Remove the Python dependency: port preparation to Java inside the plugin. This is the biggest barrier for other server owners.
   - Shapely becomes JTS. pyproj and TerraPlusMinus are already Java.
   - LAZ decoding needs a Java reader.

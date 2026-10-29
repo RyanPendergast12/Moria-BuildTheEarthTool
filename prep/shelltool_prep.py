@@ -1,4 +1,4 @@
-"""shelltool_prep.py <cache_dir> <cx> <cz> [--content shells|roads|both] [--recompute-accepted]
+"""shelltool_prep.py <cache_dir> <cx> <cz> [--content shells|roads|both|overpass] [--overpass-allow key,key] [--piers] [--recompute-accepted]
 v3 on-demand data preparation for ONE impact chunk (called by the SummerlinShellTool plugin, off the server thread).
  data      : local OSM index (Las Vegas valley, scripts/osm_index_build.py) inside its coverage; bounded Overpass outside,
              with provider avoidance and reuse of a cached neighbouring query. Failure != empty land.
@@ -21,11 +21,14 @@ from geo import Geo
 
 a = sys.argv; CACHE, CX, CZ = a[1], int(a[2]), int(a[3])
 CONTENT = a[a.index('--content') + 1] if '--content' in a else 'shells'
-WANT_SHELLS, WANT_ROADS = CONTENT in ('shells', 'both'), CONTENT in ('roads', 'both')
+WANT_SHELLS, WANT_ROADS, WANT_OVERPASS = CONTENT in ('shells', 'both'), CONTENT in ('roads', 'both'), CONTENT == 'overpass'
+ALLOW = set(a[a.index('--overpass-allow') + 1].split(',')) if '--overpass-allow' in a else set()   # pilot allowlist of crossing keys
+AGRADE = float(a[a.index('--approach-grade') + 1]) if '--approach-grade' in a else 0.0   # authorized raised approaches (0 = off)
+PIERS = '--piers' in a                                                                             # inferred piers: off unless asked
 RECOMPUTE = '--recompute-accepted' in a
-for d in ('chunks', 'buildings', 'osm', 'roads', 'ept'): os.makedirs(os.path.join(CACHE, d), exist_ok=True)
+for d in ('chunks', 'buildings', 'osm', 'roads', 'ept', 'overpass', 'crossings'): os.makedirs(os.path.join(CACHE, d), exist_ok=True)
 MAN = os.path.join(CACHE, 'chunks', f'{CX}_{CZ}.json')
-VERSION = 'shelltool_prep v3'
+VERSION = 'shelltool_prep v4.2'          # plugin re-prepares chunks whose manifest pipeline differs (cache invalidation)
 INDEX = r'C:\BTE-Migration\shelltool\osm-extract\clark_osm_index.sqlite'
 WALL, ROOF, PARTLINE, UNRESOLVED = 'minecraft:stone', 'minecraft:light_gray_wool', 'minecraft:stone', 'minecraft:orange_wool'
 DATASETS = [('NV_ClarkCo_2_B22', 2022), ('NV_ClarkCo_1_B22', 2022), ('NV_ClarkCounty_B1_2018', 2018), ('NV_LasVegasValley_2010', 2010)]
@@ -41,22 +44,24 @@ def log(*m): print('[prep %.1fs]' % (time.time() - t00), *m, flush=True)
 old = json.load(open(MAN)) if os.path.exists(MAN) else {}
 if 'shells' not in old and old.get('status'):                                  # v0.2 manifest -> shells section (migration)
     old = dict(old, shells=dict(status=old['status'], buildings=old.get('buildings', []), message=old.get('message'), retry=old.get('retry', False)))
+if old.get('pipeline') != VERSION: old = {}                                     # sections from another pipeline are not reused
 def finish(**kw):
     m = dict(old); m.update({k: v for k, v in kw.items() if v is not None})
+    m['approach_grade'] = AGRADE if (WANT_ROADS or WANT_OVERPASS) and ALLOW else m.get('approach_grade', 0.0)
     m.update(chunk=[CX, CZ], blocks=f'x {CX * 16}..{CX * 16 + 15}, z {CZ * 16}..{CZ * 16 + 15}', prepared=time.strftime('%Y-%m-%dT%H:%M:%S'), pipeline=VERSION)
     T['total'] = round(time.time() - t00, 3); m['timings_s'] = T
     m['status'] = m.get('shells', {}).get('status') or m.get('roads', {}).get('status') or 'unknown'      # read by v0.2
     m['buildings'] = m.get('shells', {}).get('buildings', [])
-    m['retry'] = any(isinstance(s, dict) and s.get('retry') for s in (m.get('shells'), m.get('roads')))
+    m['retry'] = any(isinstance(s, dict) and s.get('retry') for s in (m.get('shells'), m.get('roads'), m.get('overpass')))
     json.dump(m, open(MAN + '.tmp', 'w'), indent=1); os.replace(MAN + '.tmp', MAN)
-    log('manifest', json.dumps({k: (m.get(k) or {}).get('status') for k in ('shells', 'roads')}), T); sys.exit(0)
+    log('manifest', json.dumps({k: (m.get(k) or {}).get('status') for k in ('shells', 'roads', 'overpass')}), T); sys.exit(0)
 
 geo = Geo()
 x0, z0 = CX * 16, CZ * 16
 P = json.load(open(r'C:\BTE-Migration\summerlin\pilot\polygons.json')); strip = Polygon(P['strip_mc']).buffer(500)
 if strip.intersects(box(x0, z0, x0 + 16, z0 + 16)):
     msg = 'Chunk touches the protected Strip exclusion (+500 blocks). Nothing fetched or generated.'
-    finish(shells=dict(status='protected', message=msg), roads=dict(status='protected', message=msg))
+    finish(shells=dict(status='protected', message=msg), roads=dict(status='protected', message=msg), overpass=dict(status='protected', message=msg))
 with stage('projection'):
     corners = geo.inv([(x0, z0), (x0 + 16, z0), (x0 + 16, z0 + 16), (x0, z0 + 16)])
 chunk_ll = Polygon(corners); lons, lats = [c[0] for c in corners], [c[1] for c in corners]
@@ -114,12 +119,13 @@ with stage('footprint_road_retrieval'):
 if feats and isinstance(feats[0], str):
     fail = dict(status='provider_failure', stage='footprint_road_retrieval', errors=feats, retry=True,
                 message='OSM data could not be fetched (outside local index; all Overpass mirrors failed or are being avoided). NOT confirmed empty land; retried on the next throw.')
-    finish(shells=fail if WANT_SHELLS else None, roads=fail if WANT_ROADS else None, data_source=SRC)
+    finish(shells=fail if WANT_SHELLS else None, roads=fail if WANT_ROADS else None, overpass=fail if WANT_OVERPASS else None, data_source=SRC)
 log('data', SRC.get('source'), len(feats), 'features')
 out = dict(data_source=SRC)
 
-# ---------------- shells (rules unchanged from v2)
-if WANT_SHELLS:
+# ---------------- shells (rules unchanged from v2); independent section
+def do_shells():
+    if os.environ.get('SHELLTOOL_PREP_FAIL') == 'shells': raise RuntimeError('injected test failure (shells)')
     accepted = set()
     if not RECOMPUTE:
         for l in open(r'C:\BTE-Migration\shelltool\shells.txt'):
@@ -156,7 +162,7 @@ if WANT_SHELLS:
         with stage('terrain'):
             hts = geo.heights([tuple(p) for p in ll])
         if not np.isfinite(hts).all():
-            finish(shells=dict(status='provider_failure', stage='terrain', retry=True, message=f'TPM terrain heights incomplete ({int(np.isfinite(hts).sum())}/{len(hts)}); retried next throw'), data_source=SRC)
+            out['shells'] = dict(status='provider_failure', stage='terrain', retry=True, message=f'TPM terrain heights incomplete ({int(np.isfinite(hts).sum())}/{len(hts)}); retried next throw'); return
         E_all, N_all = to_utm(ll[:, 0], ll[:, 1])
         U = [G.bounds for _, G, _, _ in todo]; ub = (min(b[0] for b in U) - 10, min(b[1] for b in U) - 10, max(b[2] for b in U) + 10, max(b[3] for b in U) + 10)
         u2m = Transformer.from_crs(32611, 3857, always_xy=True).transform
@@ -263,163 +269,351 @@ if WANT_SHELLS:
                          message=f'{len(blds)} mapped building outline(s) intersect this chunk' if blds else 'No mapped building outline intersects this chunk in the ' + SRC.get('source', '?') + '.',
                          lidar=(dict(dataset=lid['name'], tiles=lid['tiles'], fetched=lid['fetched'], reused=lid['reused']) if lid else None))
 
-# ---------------- roads (summerlin/detailing/ROAD-IMPLEMENTATION-SPEC.md)
+if WANT_SHELLS:
+    try: do_shells()
+    except Exception as ex:
+        log('shells pipeline error', ex); out['shells'] = dict(status='pipeline_error', retry=True, message=f'shell preparation failed ({type(ex).__name__}: {ex}); other content is unaffected')
+
+# ---------------- road model: one marking/sidewalk model for ground roads AND bridge decks (ROAD-IMPLEMENTATION-SPEC.md)
+# Palette (roadstyle v2): read-only survey of the builders' Las Vegas Blvd frontage at Bellagio + BTE Roads Guidebook p.63-64:
+# asphalt gray_concrete_powder/cyan_terracotta ~50/50, lines white/yellow concrete POWDER, sidewalk light_gray_concrete_powder,
+# flush smooth_stone kerb (guide pp.15-18, 61-62). Dash 3 on / 9 off (guide; MUTCD 10 ft / 30 ft scaled ESTIMATE).
+STYLE = 'roadstyle-v2'
 CARRIAGE = {'motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link',
             'unclassified', 'residential', 'living_street', 'service', 'road'}
 DEFAULT_LANES = {'motorway': 2, 'trunk': 2, 'primary': 2, 'secondary': 2, 'tertiary': 1, 'unclassified': 1, 'residential': 1, 'living_street': 1, 'service': 1, 'road': 1}
 MARKED = {'motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link'}
 CURBED = CARRIAGE - {'motorway', 'motorway_link', 'trunk', 'trunk_link', 'service'}
 LANE_M, SIDEWALK_M, BIKE_M, CURB_M, CROSS_M, DASH_ON, DASH_PERIOD = 3.6, 1.5, 1.5, 1.0, 3.0, 3.0, 12.0
-SHOULDER = {'motorway': (3.0, 1.2), 'motorway_link': (2.4, 1.2), 'trunk': (3.0, 1.2), 'trunk_link': (2.4, 1.2)}   # (right, left) estimates
+SHOULDER = {'motorway': (3.0, 1.2), 'motorway_link': (2.4, 1.2), 'trunk': (3.0, 1.2), 'trunk_link': (2.4, 1.2)}   # (right, left) ESTIMATES
+PAVE_A, PAVE_B = 'minecraft:gray_concrete_powder', 'minecraft:cyan_terracotta'
+WHITE, YELLOW, SIDEWALK_BLK, CURB_BLK = 'minecraft:white_concrete_powder', 'minecraft:yellow_concrete_powder', 'minecraft:light_gray_concrete_powder', 'minecraft:smooth_stone'
 def num(v):
     try: return float(str(v).lower().replace('m', '').strip())
     except Exception: return None
 def hsh(x, z): return ((x * 73856093) ^ (z * 19349663)) & 0xffff
-if WANT_ROADS:
-    with stage('planning'):
-        ways, unsupported = [], []
-        ctx = chunk_ll.buffer(0.0006)                                                    # ~60 m context: widths, joins, junctions
-        for f in feats:
-            if f['kind'] != 'highway' or f['geom'].geom_type != 'LineString' or len(f['geom'].coords) < 2 or not f['geom'].intersects(ctx): continue
-            t = f['tags']; hw = t.get('highway'); fid = f['id']
-            grade = [k + '=' + t[k] for k in ('bridge', 'tunnel') if t.get(k, 'no') != 'no'] + (['layer=' + t['layer']] if t.get('layer', '0') != '0' else []) + (['covered'] if t.get('covered') == 'yes' else [])
-            if hw in CARRIAGE and grade:
-                if f['geom'].intersects(chunk_ll): unsupported.append(dict(id=fid, highway=hw, name=t.get('name'), reason='grade-separated (' + ','.join(grade) + '): deck/tunnel elevation not resolved from evidence; skipped (ground road beneath untouched)'))
-                continue
-            if hw == 'service' and t.get('service') in ('parking_aisle', 'drive-through'):
-                if f['geom'].intersects(chunk_ll): unsupported.append(dict(id=fid, highway=hw, reason='service=' + t['service'] + ' not generated (pilot rule)'))
-                continue
-            if hw in CARRIAGE and t.get('area') != 'yes': ways.append(('carriage', f))
-            elif hw == 'footway' and t.get('footway') == 'sidewalk' and not grade: ways.append(('sidewalk', f))
-            elif hw == 'footway' and t.get('footway') == 'crossing' and not grade: ways.append(('crossing', f))
-            elif f['geom'].intersects(chunk_ll) and hw not in ('footway', 'path', 'cycleway', 'steps', 'pedestrian', 'track', 'bridleway'):
-                unsupported.append(dict(id=fid, highway=hw, reason='class not generated by this spec'))
-        areas = [f for f in feats if f['kind'] == 'area_highway' and f['geom'].geom_type == 'Polygon' and f['geom'].intersects(ctx)]
-        blds_ll = [f['geom'] for f in feats if f['kind'] == 'building' and f['geom'].intersects(chunk_ll.buffer(0.0002))]
+def pave(x, z): return PAVE_B if hsh(x, z) % 2 == 0 else PAVE_A
+
+def build_model(ways_mc, areas_mc, B):
+    """ways_mc: [(kind, feature, LineString in block space)] -> carriageways (width, markings, kerbs), sidewalks, crossings, areas"""
+    sidewalk_lines = [L for kind, f, L in ways_mc if kind == 'sidewalk']
+    feats_out, carr = [], []
+    for kind, f, L in ways_mc:
+        if kind != 'carriage': continue
+        t = f['tags']; hw = t.get('highway')
+        oneway = t.get('oneway') in ('yes', '1', '-1') or hw in ('motorway', 'motorway_link') or t.get('junction') == 'roundabout'
+        if t.get('oneway') == '-1': L = LineString(list(L.coords)[::-1])
+        lanes = int(num(t['lanes'])) if num(t.get('lanes')) else None
+        lane_src = 'osm lanes' if lanes else 'estimate (default for highway=' + hw + ')'
+        if not lanes: lanes = DEFAULT_LANES.get(hw, 1) * (1 if oneway else 2)
+        cyc = {k: t.get(k) for k in ('cycleway', 'cycleway:both', 'cycleway:left', 'cycleway:right')}
+        nbike = 2 if cyc['cycleway:both'] == 'lane' or (cyc['cycleway'] == 'lane' and not oneway) else (1 if 'lane' in cyc.values() else 0)
+        lw, wtag = LANE_M, num(t.get('width'))
+        if wtag: W, wsrc = wtag, 'osm width tag (mapped attribute)'; lw = max(2.5, (W - nbike * BIKE_M) / lanes)
+        else: W, wsrc = lanes * LANE_M + nbike * BIKE_M, f'ESTIMATE: {lanes} lanes x {LANE_M} m' + (f' + {nbike} x {BIKE_M} m bike lane' if nbike else '')
+        sh = SHOULDER.get(hw, (0, 0)); Wtot = W + sh[0] + (sh[1] if oneway else sh[0]); half = Wtot / 2 * B
+        poly = L.buffer(half, cap_style=1, join_style=1)
+        marks = []                                  # (offset m, left of travel positive; colour; style; why)
+        if hw in MARKED or (hw in ('residential', 'unclassified') and 'lanes' in t and lanes >= 2):
+            edge = -Wtot / 2 + sh[0]; e0 = edge
+            if oneway:
+                turns = (t.get('turn:lanes') or '').split('|')[::-1] if t.get('turn:lanes') else []        # OSM order is left->right
+                cat = lambda i: ('turn' if any(s in (turns[i] if i < len(turns) else '') for s in ('left', 'right')) and 'through' not in (turns[i] if i < len(turns) else '') else 'through')
+                marks.append((e0 + 0.5 / B, 'white', 'solid', 'right edge line'))
+                if nbike: marks.append((edge + BIKE_M, 'white', 'solid', 'bike lane line (cycleway lane)')); edge += BIKE_M
+                for kk in range(1, lanes):
+                    turnsep = bool(turns) and cat(kk - 1) != cat(kk)
+                    marks.append((edge + kk * lw, 'white', 'solid' if turnsep else 'dashed', 'turn-lane separation (turn:lanes; solid = ESTIMATE)' if turnsep else 'lane line'))
+                marks.append((edge + lanes * lw - 0.5 / B * (0 if hw in SHOULDER else 1), 'yellow', 'solid', 'left edge line (one-way roadway, MUTCD)'))
+            else:
+                nf = int(num(t.get('lanes:forward'))) if num(t.get('lanes:forward')) else (lanes + 1) // 2
+                twl = 1 if num(t.get('lanes:both_ways')) == 1 else 0
+                nbw = max(lanes - nf - twl, 0)
+                if nbike: edge += BIKE_M; marks.append((edge, 'white', 'solid', 'bike lane line'))
+                for kk in range(1, nf): marks.append((edge + kk * lw, 'white', 'dashed', 'lane line'))
+                c1 = edge + nf * lw; marks.append((c1, 'yellow', 'solid', 'centre line'))
+                if twl: marks.append((c1 + lw, 'yellow', 'solid', 'centre line (two-way left turn lane)'))
+                c2 = c1 + twl * lw
+                for kk in range(1, nbw): marks.append((c2 + kk * lw, 'white', 'dashed', 'lane line'))
+                if nbike: marks.append((c2 + nbw * lw, 'white', 'solid', 'bike lane line'))
+        sw = t.get('sidewalk', t.get('sidewalk:both', ''))
+        sides = set({'both': ('l', 'r'), 'yes': ('l', 'r'), 'left': ('l',), 'right': ('r',)}.get(sw, ()))
+        if t.get('sidewalk:left') == 'yes': sides.add('l')
+        if t.get('sidewalk:right') == 'yes': sides.add('r')
+        mapped_near = any(L.distance(S) <= half + (CURB_M + SIDEWALK_M + 3) * B for S in sidewalk_lines)
+        inferred = []
+        if sides and not mapped_near:
+            inner_d = half + (CURB_M * B if hw in CURBED else 0); outer_d = inner_d + SIDEWALK_M * B
+            for sd in sides:
+                sg = -1 if sd == 'l' else 1             # shapely left = +y; block z grows southward, so map-left is shapely-right
+                inferred.append(L.buffer(sg * outer_d, single_sided=True).difference(L.buffer(sg * inner_d, single_sided=True)))
+        c0 = L.coords[0]; c1_ = L.coords[1]; u0 = np.subtract(c1_, c0); u0 = u0 / (np.linalg.norm(u0) or 1)
+        carr.append(dict(id=f['id'], hw=hw, L=L, poly=poly, half=half, marks=marks, curb=hw in CURBED, inferred=inferred, est=not wtag,
+                         phase0=float(np.dot(c0, u0))))      # dash phase continues across chained, collinear ways (road -> bridge)
+        feats_out.append(dict(id=f['id'], name=t.get('name'), highway=hw, oneway=oneway, lanes=lanes, lanes_source=lane_src, width_m=round(Wtot, 2),
+                              width_source=wsrc + (f' + shoulders {sh[0]}/{sh[1] if oneway else sh[0]} m (ESTIMATE)' if sh[0] else ''), lane_width_m=round(lw, 2),
+                              sidewalks=('mapped separately (footway=sidewalk); not inferred' if mapped_near else (f'INFERRED from sidewalk={sw or "side tags"} ({SIDEWALK_M} m ESTIMATE)' if sides else 'none tagged/mapped')),
+                              markings=[f'{c} {sty} at {o:+.1f} m ({why})' for o, c, sty, why in marks] or ['none (class/lanes unmarked by this spec)'],
+                              curbs='flush 1-block kerb (ESTIMATE)' if hw in CURBED else 'none (highway/service class)'))
+    vert = {}
+    for c in carr:
+        for p in c['L'].coords: vert.setdefault((round(p[0], 3), round(p[1], 3)), set()).add(c['id'])
+    byid = {c['id']: c for c in carr}
+    return dict(carr=carr, feats_out=feats_out,
+                junc=[(Point(p), max(byid[i]['half'] for i in ids) + 2 * B) for p, ids in vert.items() if len(ids) > 1],
+                sw_polys=[(f, L.buffer((num(f['tags'].get('width')) or SIDEWALK_M) / 2 * B, cap_style=2)) for kind, f, L in ways_mc if kind == 'sidewalk'],
+                cr_polys=[(f, L, L.buffer(CROSS_M / 2 * B, cap_style=2)) for kind, f, L in ways_mc if kind == 'crossing'],
+                carea=[(g, p) for g, p in areas_mc if g['tags'].get('area:highway') in CARRIAGE],
+                sarea=[(g, p) for g, p in areas_mc if g['tags'].get('area:highway') in ('footway', 'sidewalk')],
+                curbs=[(c, c['poly'].buffer(CURB_M * B)) for c in carr if c['curb']])
+
+def classify(x, z, M, B, only=None):
+    """surface for block column (x, z): (block, role, feature, label) or None. only: allowed carriageway ids (None = all)"""
+    P_ = Point(x + 0.5, z + 0.5); carr = [c for c in M['carr'] if only is None or c['id'] in only]
+    inside = [c for c in carr if c['poly'].contains(P_)]
+    ca = next((g for g, p in M['carea'] if p.contains(P_)), None) if only is None else None
+    if only is None and inside and all(c['est'] for c in inside) and not any(pc.contains(P_) for _, _, pc in M['cr_polys']):
+        # mapped sidewalk = positional evidence of the road edge: it overrides an ESTIMATED carriageway width
+        sm = next((f for f, p in M['sw_polys'] if p.contains(P_)), None)
+        if sm: return (SIDEWALK_BLK, 'sidewalk', sm['id'], 'MAPPED sidewalk (overrides estimated road width)')
+        if any(p.buffer(CURB_M * B).contains(P_) for f, p in M['sw_polys']) and any(c['curb'] for c in inside):
+            return (CURB_BLK, 'curb', inside[0]['id'], 'kerb at mapped sidewalk (ESTIMATE)')
+    if inside:
+        c = min(inside, key=lambda c: c['L'].distance(P_)); L = c['L']
+        s_ = L.project(P_); q = L.interpolate(s_); q2 = L.interpolate(min(s_ + 0.5, L.length)); q1 = L.interpolate(max(s_ - 0.5, 0))
+        ux, uz = q2.x - q1.x, q2.y - q1.y; nrm = math.hypot(ux, uz) or 1; ux, uz = ux / nrm, uz / nrm
+        d = ((P_.x - q.x) * uz - (P_.y - q.y) * ux) / B                   # metres; left of travel direction positive
+        cr = next(((f, Lc) for f, Lc, pc in M['cr_polys'] if pc.contains(P_)), None) if only is None else None
+        if cr and cr[0]['tags'].get('crossing') not in ('unmarked', 'no'):
+            return ('minecraft:white_concrete_powder' if int(cr[1].project(P_) / B) % 2 == 0 else PAVE_A, 'crossing', cr[0]['id'], 'mapped crossing; bar pattern = engineering choice')
+        thin = 0.5 * max(abs(ux), abs(uz)) / B                              # 1-block digital line (guide 4.4 thin lines)
+        injunc = len({cc['id'] for cc in inside}) > 1 or any(jp.distance(P_) < r for jp, r in M['junc'])
+        if not injunc:
+            ph = ((s_ + c['phase0']) / B) % DASH_PERIOD
+            for o, col, sty, why in c['marks']:
+                if abs(d - o) < thin and (sty == 'solid' or ph < DASH_ON):
+                    return (WHITE if col == 'white' else YELLOW, 'marking', c['id'], f'{col} {sty} {why} at {o:+.1f} m (dash phase continuous along the route)')
+        return (pave(x, z), 'pavement', c['id'], 'carriageway (width per feature report)')
+    if ca: return (pave(x, z), 'pavement', ca['id'], 'mapped area:highway (measured boundary)')
+    if only is not None: return None
+    cb = next((c for c, p in M['curbs'] if p.contains(P_)), None)
+    if cb: return (CURB_BLK, 'curb', cb['id'], 'kerb (ESTIMATE)')
+    sm = next((f for f, p in M['sw_polys'] if p.contains(P_)), None) or next((g for g, p in M['sarea'] if p.contains(P_)), None)
+    if sm: return (SIDEWALK_BLK, 'sidewalk', sm['id'], 'MAPPED sidewalk (width tag or 1.5 m ESTIMATE)')
+    si = next((c for c in carr for bnd in c['inferred'] if bnd.contains(P_)), None)
+    if si: return (SIDEWALK_BLK, 'sidewalk', si['id'], 'INFERRED sidewalk (sidewalk tag; 1.5 m ESTIMATE)')
+    return None
+
+def grade_of(t): return [k + '=' + t[k] for k in ('bridge', 'tunnel') if t.get(k, 'no') != 'no'] + (['layer=' + t['layer']] if t.get('layer', '0') != '0' else []) + (['covered'] if t.get('covered') == 'yes' else [])
+ctx = chunk_ll.buffer(0.0006)                                                           # ~60 m context: widths, joins, junctions
+uu = Transformer.from_crs(4326, 32611, always_xy=True).transform
+(ea, na), (eb, nb2) = uu(*corners[0]), uu(*corners[1]); BPM = 16 / math.hypot(eb - ea, nb2 - na)              # blocks per metre here
+
+# ---------------- overpass (v0.4: prep/overpass.py). Whole-crossing plan, clipped to this chunk. Runs for content overpass, and for
+# roads/both when the server enables overpasses (--overpass-allow). Independent: a failure here never suppresses shells or roads.
+OV = dict(deck={}, upper=set(), lower=set(), sidewalks=set(), unresolved_upper=set(), reps=[], cells=[], raised=[], keys=[])
+def index_around(bounds, pad):
+    """crossing-level feature set from the local index, independent of which chunk asked"""
+    if not os.path.exists(INDEX): return None
+    con = sqlite3.connect(f'file:{INDEX}?mode=ro', uri=True); C = json.loads(con.execute("select v from meta where k='coverage_lonlat_box'").fetchone()[0])
+    if not (C[0] <= bounds[0] - pad and C[1] <= bounds[1] - pad and C[2] >= bounds[2] + pad and C[3] >= bounds[3] + pad): con.close(); return None
+    rows = con.execute('select f.osm,f.kind,f.tags,f.wkb from feat f join feat_idx i on f.id=i.id where f.kind=? and i.maxx>=? and i.minx<=? and i.maxy>=? and i.miny<=?',
+                       ('highway', bounds[0] - pad, bounds[2] + pad, bounds[1] - pad, bounds[3] + pad)).fetchall(); con.close()
+    return [dict(id=o, kind=k, tags=json.loads(t), geom=swkb.loads(g)) for o, k, t, g in rows]
+def lidar_fetch(box3857):
+    for name, year in DATASETS:
+        r = ept_cached.fetch(EPT + name, box3857, os.path.join(CACHE, 'ept'), max_nodes=600)      # provider errors propagate -> plan reports retry
+        if r is not None and (r['cls'] == 17).sum() > 200: r['dataset'] = f'{name} ({year})'; return r
+    return None
+def do_overpass():
+    import overpass
+    if os.environ.get('SHELLTOOL_PREP_FAIL') == 'overpass': raise RuntimeError('injected test failure (overpass)')
+    near = chunk_ll.buffer(0.0025 if AGRADE else 0.0005)        # ~50 m deck reach; ~250 m when raised approaches spread from the deck ends
+    pool = (index_around(chunk_ll.bounds, 0.0025) or feats) if AGRADE else feats
+    cand = sorted((f for f in pool if f['kind'] == 'highway' and f['geom'].geom_type == 'LineString' and f['tags'].get('bridge', 'no') != 'no'
+                   and f['tags'].get('highway') in overpass.CARRIAGE and f['geom'].intersects(near)), key=lambda f: f['id'])
+    if AGRADE: cand = [f for f in cand if f['tags'].get('highway') not in ('footway', 'cycleway', 'path')]
+    seen = set()
+    for f in cand:
+        fx = index_around(f['geom'].bounds, 0.002)
+        if fx is None: OV['reps'].append(dict(key=f['id'], status='unresolved', reasons=['outside the local OSM index: crossings need complete ways'])); OV['unresolved_upper'].add(f['id']); continue
+        cr = overpass.crossing_of(fx, f['id'])
+        if not cr or cr['key'] in seen: continue
+        seen.add(cr['key'])
+        if cr['key'] not in ALLOW:
+            OV['reps'].append(dict(key=cr['key'], status='not_enabled', reasons=['overpass generation is limited to the pilot allowlist (config overpass-crossings)'])); OV['unresolved_upper'] |= set(cr['upper']); continue
+        pl = overpass.plan(fx, cr, geo, lidar_fetch, CACHE, piers=PIERS, approach_grade=AGRADE)
+        here = [c for c in pl['cells'] if (c[0] >> 4) == CX and (c[1] >> 4) == CZ] if pl['status'] == 'ready' else []
+        if pl['status'] == 'ready':
+            OV['upper'] |= set(cr['upper']); OV['lower'] |= set(cr['lower'])
+            OV['deck'].update({(c[0], c[1]): c[2] for c in pl['cells'] if c[5] == 'deck'})
+            # sidewalks carried by this deck: mapped footway=sidewalk, same bridge layer, alongside the upper ways
+            ups = [g['geom'] for g in fx if g['id'] in cr['upper']]
+            OV['sidewalks'] |= {g['id'] for g in fx if g['tags'].get('highway') == 'footway' and g['tags'].get('footway') == 'sidewalk' and g['tags'].get('bridge', 'no') != 'no'
+                                and g['tags'].get('layer', '1') == str(cr['layer']) and any(g['geom'].distance(u) < 0.0003 for u in ups)}
+        else: OV['unresolved_upper'] |= set(cr['upper'])
+        ap = pl.get('approach') if AGRADE else None
+        if pl['status'] == 'ready' and ap:
+            OV['raised'] += [dict(r, key=cr['key']) for r in ap['samples']]; OV['keys'].append((cr['key'], ap['grade']))
+            for e in pl.get('deck_ends', []): e['status'] = f"connected by a raised approach (max grade {ap['grade']:.0%}; network spread, freeway fixed)"
+        OV['cells'] += here
+        OV['reps'].append(dict({k: v for k, v in pl.items() if k not in ('cells', 'clearance_columns', 'approach')}, cells_here=len(here),
+                               approach=(dict({k: v for k, v in ap.items() if k != 'samples'}, raised_samples=len(ap['samples'])) if ap else 'not authorized (deck ends stay open)'),
+                               outstanding=['existing ground-level Charleston road markings under the deck are left untouched (visual/layout issue, not resolved)']))
+WANT_OV = WANT_OVERPASS or (WANT_ROADS and bool(ALLOW))
+if WANT_OV:
+    with stage('overpass'):
+        try: do_overpass(); ov_err = None
+        except Exception as ex: ov_err = f'{type(ex).__name__}: {ex}'; OV.update(cells=[], deck={}); log('overpass pipeline error', ov_err)
+
+# ---------------- roads: ground roads (lower features) + the deck surface of enabled crossings (explicit deck Y)
+def do_roads():
+    if os.environ.get('SHELLTOOL_PREP_FAIL') == 'roads': raise RuntimeError('injected test failure (roads)')
+    ways, deck_ways, unsupported = [], [], []
+    for f in feats:
+        if f['kind'] != 'highway' or f['geom'].geom_type != 'LineString' or len(f['geom'].coords) < 2 or not f['geom'].intersects(ctx): continue
+        t = f['tags']; hw = t.get('highway'); fid = f['id']; grade = grade_of(t)
+        if fid in OV['upper']: deck_ways.append(('carriage', f)); continue                       # carried on the deck (explicit Y), never on the ground
+        if fid in OV['sidewalks']: deck_ways.append(('sidewalk', f)); continue
+        if hw in CARRIAGE and grade:
+            if f['geom'].intersects(chunk_ll):
+                why = ('crossing not enabled / unresolved: road not generated (the section depends on its elevated geometry)' if fid in OV['unresolved_upper']
+                       else 'grade-separated (' + ','.join(grade) + '): elevation not resolved from evidence; skipped (ground road beneath untouched)')
+                unsupported.append(dict(id=fid, highway=hw, name=t.get('name'), reason=why))
+            continue
+        if hw == 'service' and t.get('service') in ('parking_aisle', 'drive-through'):
+            if f['geom'].intersects(chunk_ll): unsupported.append(dict(id=fid, highway=hw, reason='service=' + t['service'] + ' not generated (pilot rule)'))
+            continue
+        if hw in CARRIAGE and t.get('area') != 'yes': ways.append(('carriage', f))
+        elif hw == 'footway' and t.get('footway') == 'sidewalk' and not grade: ways.append(('sidewalk', f))
+        elif hw == 'footway' and t.get('footway') == 'crossing' and not grade: ways.append(('crossing', f))
+        elif f['geom'].intersects(chunk_ll) and hw not in ('footway', 'path', 'cycleway', 'steps', 'pedestrian', 'track', 'bridleway'):
+            unsupported.append(dict(id=fid, highway=hw, reason='class not generated by this spec'))
+    areas = [f for f in feats if f['kind'] == 'area_highway' and f['geom'].geom_type == 'Polygon' and f['geom'].intersects(ctx)]
+    blds_ll = [f['geom'] for f in feats if f['kind'] == 'building' and f['geom'].intersects(chunk_ll.buffer(0.0002))]
     with stage('projection'):
-        pts = [c for _, f in ways for c in f['geom'].coords] + [c for g in areas for c in g['geom'].exterior.coords] + \
+        allw = ways + deck_ways
+        pts = [c for _, f in allw for c in f['geom'].coords] + [c for g in areas for c in g['geom'].exterior.coords] + \
               [c for g in blds_ll for gg in (g.geoms if g.geom_type == 'MultiPolygon' else [g]) for c in gg.exterior.coords]
         mc = geo.fwd(pts) if pts else []
-        cells_ll = geo.inv([(x0 + i + 0.5, z0 + j + 0.5) for j in range(16) for i in range(16)])
-        uu = Transformer.from_crs(4326, 32611, always_xy=True).transform
-        (ea, na), (eb, nb2) = uu(*corners[0]), uu(*corners[1]); B = 16 / math.hypot(eb - ea, nb2 - na)              # blocks per metre here
+        MG = 10 if OV['raised'] else 0                                                    # margin for edge/median decisions
+        grid = [(x0 + i, z0 + j) for j in range(-MG, 16 + MG) for i in range(-MG, 16 + MG)]   # MG covers neighbour + 8-block enclosure scan
+        cells_ll = geo.inv([(x + 0.5, z + 0.5) for x, z in grid])
     with stage('terrain'):
-        hh = geo.heights(cells_ll)
-    if WANT_ROADS and not np.isfinite(hh).all():
-        finish(roads=dict(status='provider_failure', stage='terrain', retry=True, message='TPM terrain heights incomplete; retried next throw'), **{k: v for k, v in out.items() if k != 'data_source'}, data_source=SRC)
-    ey = np.floor(hh).astype(int)
+        if os.environ.get('SHELLTOOL_PREP_FAIL') == 'roads-terrain': hh = np.full(len(grid), np.nan)
+        else: hh = geo.heights(cells_ll)
+    if not np.isfinite(hh).all():
+        out['roads'] = dict(status='provider_failure', stage='terrain', retry=True, message='TPM terrain heights incomplete; retried next throw'); return
+    EY = {c: int(v) for c, v in zip(grid, np.floor(hh))}
     with stage('planning'):
         it = iter(mc)
-        ways_mc = [(kind, f, LineString([next(it) for _ in f['geom'].coords])) for kind, f in ways]
+        allw_mc = [(kind, f, LineString([next(it) for _ in f['geom'].coords])) for kind, f in allw]
+        ways_mc, deck_mc = allw_mc[:len(ways)], allw_mc[len(ways):]
         areas_mc = [(g, Polygon([next(it) for _ in g['geom'].exterior.coords])) for g in areas]
         bld_mc = []
         for g in blds_ll:
             for gg in (g.geoms if g.geom_type == 'MultiPolygon' else [g]): bld_mc.append(Polygon([next(it) for _ in gg.exterior.coords]))
-        sidewalk_lines = [L for kind, f, L in ways_mc if kind == 'sidewalk']
-        feats_out, carr = [], []
-        for kind, f, L in ways_mc:
-            if kind != 'carriage': continue
-            t = f['tags']; hw = t.get('highway')
-            oneway = t.get('oneway') in ('yes', '1', '-1') or hw in ('motorway', 'motorway_link') or t.get('junction') == 'roundabout'
-            if t.get('oneway') == '-1': L = LineString(list(L.coords)[::-1])
-            lanes = int(num(t['lanes'])) if num(t.get('lanes')) else None
-            lane_src = 'osm lanes' if lanes else 'estimate (default for highway=' + hw + ')'
-            if not lanes: lanes = DEFAULT_LANES.get(hw, 1) * (1 if oneway else 2)
-            cyc = {k: t.get(k) for k in ('cycleway', 'cycleway:both', 'cycleway:left', 'cycleway:right')}
-            nbike = 2 if cyc['cycleway:both'] == 'lane' or (cyc['cycleway'] == 'lane' and not oneway) else (1 if 'lane' in cyc.values() else 0)
-            lw, wtag = LANE_M, num(t.get('width'))
-            if wtag: W, wsrc = wtag, 'osm width tag (mapped attribute)'; lw = max(2.5, (W - nbike * BIKE_M) / lanes)
-            else: W, wsrc = lanes * LANE_M + nbike * BIKE_M, f'ESTIMATE: {lanes} lanes x {LANE_M} m' + (f' + {nbike} x {BIKE_M} m bike lane' if nbike else '')
-            sh = SHOULDER.get(hw, (0, 0)); Wtot = W + sh[0] + (sh[1] if oneway else sh[0]); half = Wtot / 2 * B
-            poly = L.buffer(half, cap_style=1, join_style=1)
-            marks = []                                  # (offset m, left of travel positive; colour; style)
-            if hw in MARKED or (hw in ('residential', 'unclassified') and 'lanes' in t and lanes >= 2):
-                edge = -Wtot / 2 + sh[0]
-                if oneway:
-                    if nbike: marks.append((edge + BIKE_M, 'white', 'solid')); edge += BIKE_M
-                    for kk in range(1, lanes): marks.append((edge + kk * lw, 'white', 'dashed'))
-                    if hw in SHOULDER: marks += [(edge, 'white', 'solid'), (edge + lanes * lw, 'yellow', 'solid')]
-                else:
-                    nf = int(num(t.get('lanes:forward'))) if num(t.get('lanes:forward')) else (lanes + 1) // 2
-                    twl = 1 if num(t.get('lanes:both_ways')) == 1 else 0
-                    nbw = max(lanes - nf - twl, 0)
-                    if nbike: edge += BIKE_M; marks.append((edge, 'white', 'solid'))
-                    for kk in range(1, nf): marks.append((edge + kk * lw, 'white', 'dashed'))
-                    c1 = edge + nf * lw; marks.append((c1, 'yellow', 'solid'))
-                    if twl: marks.append((c1 + lw, 'yellow', 'solid'))
-                    c2 = c1 + twl * lw
-                    for kk in range(1, nbw): marks.append((c2 + kk * lw, 'white', 'dashed'))
-                    if nbike: marks.append((c2 + nbw * lw, 'white', 'solid'))
-            sw = t.get('sidewalk', t.get('sidewalk:both', ''))
-            sides = set({'both': ('l', 'r'), 'yes': ('l', 'r'), 'left': ('l',), 'right': ('r',)}.get(sw, ()))
-            if t.get('sidewalk:left') == 'yes': sides.add('l')
-            if t.get('sidewalk:right') == 'yes': sides.add('r')
-            mapped_near = any(L.distance(S) <= half + (CURB_M + SIDEWALK_M + 3) * B for S in sidewalk_lines)
-            inferred = []
-            if sides and not mapped_near:
-                inner_d = half + (CURB_M * B if hw in CURBED else 0); outer_d = inner_d + SIDEWALK_M * B
-                for sd in sides:
-                    sg = -1 if sd == 'l' else 1             # shapely left = +y; block z grows southward, so map-left is shapely-right
-                    inferred.append(L.buffer(sg * outer_d, single_sided=True).difference(L.buffer(sg * inner_d, single_sided=True)))
-            carr.append(dict(id=f['id'], hw=hw, L=L, poly=poly, half=half, marks=marks, curb=hw in CURBED, inferred=inferred, est=not wtag))
-            feats_out.append(dict(id=f['id'], name=t.get('name'), highway=hw, oneway=oneway, lanes=lanes, lanes_source=lane_src, width_m=round(Wtot, 2),
-                                  width_source=wsrc + (f' + shoulders {sh[0]}/{sh[1] if oneway else sh[0]} m (ESTIMATE)' if sh[0] else ''), lane_width_m=round(lw, 2),
-                                  sidewalks=('mapped separately (footway=sidewalk); not inferred' if mapped_near else (f'INFERRED from sidewalk={sw or "side tags"} ({SIDEWALK_M} m ESTIMATE)' if sides else 'none tagged/mapped')),
-                                  markings=[f'{c} {sty} at {o:+.1f} m' for o, c, sty in marks] or ['none (class/lanes unmarked by this spec)'],
-                                  curbs='flush 1-block curb (ESTIMATE)' if hw in CURBED else 'none (highway/service class)'))
-        vert = {}
-        for c in carr:
-            for p in c['L'].coords: vert.setdefault((round(p[0], 3), round(p[1], 3)), set()).add(c['id'])
-        byid = {c['id']: c for c in carr}
-        junc = [(Point(p), max(byid[i]['half'] for i in ids) + 2 * B) for p, ids in vert.items() if len(ids) > 1]
-        sw_polys = [(f, L.buffer((num(f['tags'].get('width')) or SIDEWALK_M) / 2 * B, cap_style=2)) for kind, f, L in ways_mc if kind == 'sidewalk']
-        cr_polys = [(f, L, L.buffer(CROSS_M / 2 * B, cap_style=2)) for kind, f, L in ways_mc if kind == 'crossing']
-        carea = [(g, p) for g, p in areas_mc if g['tags'].get('area:highway') in CARRIAGE]
-        sarea = [(g, p) for g, p in areas_mc if g['tags'].get('area:highway') in ('footway', 'sidewalk')]
-        curbs = [(c, c['poly'].buffer(CURB_M * B)) for c in carr if c['curb']]
+        M = build_model(ways_mc, areas_mc, BPM)
         cells, counts = [], {}
-        def add(x, z, i, block, role, fid, label):
-            cells.append([x, z, int(ey[i]), block, role, fid, label]); counts[role] = counts.get(role, 0) + 1
+        # ---- raised approaches (authorized grade): road columns take the approach height of their own way (sidewalks/kerbs: the
+        #      nearest raised carriageway); enclosed medians are filled; edges become retaining walls with a barrier on top
+        from scipy.spatial import cKDTree
+        RW = {}
+        for r_ in OV['raised']: RW.setdefault(r_['way'], []).append(r_)
+        TR = {w: (cKDTree([(q['x'], q['z']) for q in v]), v) for w, v in RW.items()}
+        TA = (cKDTree([(q['x'], q['z']) for q in OV['raised']]), OV['raised']) if OV['raised'] else None
+        def near(T, x, z, lim):
+            d, i = T[0].query((x + 0.5, z + 0.5)); return T[1][i] if d <= lim else None
+        memo = {}
+        def tgt(x, z):
+            if (x, z) in memo: return memo[(x, z)]
+            g = EY.get((x, z)); res = (None, None, g)
+            if g is not None and (x, z) not in OV['deck'] and not any(b.contains(Point(x + 0.5, z + 0.5)) for b in bld_mc):
+                r = classify(x, z, M, BPM)
+                if r is not None and TA:
+                    # own way's samples (way id rules out other roads; 16 covers the half-width of a 6-lane carriageway); kerbs/sidewalks/crossings: nearest raised road
+                    q = near(TR[r[2]], x, z, 16) if (r[1] in ('pavement', 'marking') and r[2] in TR) else near(TA, x, z, 14)
+                    res = ((int(round(q['h'])) if q and round(q['h']) > g else None), r, g, q)
+                else: res = (None, r, g)
+            memo[(x, z)] = res; return res
+        def sandwich(x, z):                                       # any unraised column enclosed by raised road (median, island, hole)
+            g = EY.get((x, z))
+            if g is None or (x, z) in OV['deck'] or tgt(x, z)[0] is not None: return None
+            for dx, dz in ((1, 0), (0, 1), (1, 1), (1, -1)):          # both axes and both diagonals (roads run at any angle)
+                a_ = b_ = None
+                for k in range(1, 9):
+                    if a_ is None: a_ = tgt(x + dx * k, z + dz * k)[0]
+                    if b_ is None: b_ = tgt(x - dx * k, z - dz * k)[0]
+                if a_ is not None and b_ is not None and min(a_, b_) > g: return min(a_, b_)
+            return None
+        def top(x, z):                                            # final surface height of any column (deck, raised, median, ground)
+            if (x, z) in OV['deck']: return OV['deck'][(x, z)]
+            t = tgt(x, z)[0]
+            if t is None: t = sandwich(x, z)
+            return t if t is not None else EY.get((x, z))
+        fills, surfs, bars = [], [], []
+        KEY = OV['keys'][0] if OV['keys'] else (None, 0)
         for j in range(16):
             for i in range(16):
-                x, z = x0 + i, z0 + j; P_ = Point(x + 0.5, z + 0.5); idx = j * 16 + i
-                if any(b.contains(P_) for b in bld_mc): counts['skipped_under_building'] = counts.get('skipped_under_building', 0) + 1; continue
-                inside = [c for c in carr if c['poly'].contains(P_)]
-                ca = next((g for g, p in carea if p.contains(P_)), None)
-                if inside and all(c['est'] for c in inside) and not any(pc.contains(P_) for _, _, pc in cr_polys):
-                    # mapped sidewalk = positional evidence of the road edge: it overrides an ESTIMATED carriageway width
-                    sm = next((f for f, p in sw_polys if p.contains(P_)), None)
-                    if sm: add(x, z, idx, 'minecraft:light_gray_wool' if hsh(x, z) % 3 == 0 else 'minecraft:light_gray_concrete_powder', 'sidewalk', sm['id'], 'MAPPED sidewalk (overrides estimated road width)'); continue
-                    if any(p.buffer(CURB_M * B).contains(P_) for f, p in sw_polys) and any(c['curb'] for c in inside):
-                        add(x, z, idx, 'minecraft:smooth_stone', 'curb', inside[0]['id'], 'curb at mapped sidewalk (estimate)'); continue
-                if inside:
-                    c = min(inside, key=lambda c: c['L'].distance(P_)); L = c['L']
-                    s_ = L.project(P_); q = L.interpolate(s_); q2 = L.interpolate(min(s_ + 0.5, L.length)); q1 = L.interpolate(max(s_ - 0.5, 0))
-                    ux, uz = q2.x - q1.x, q2.y - q1.y; nrm = math.hypot(ux, uz) or 1; ux, uz = ux / nrm, uz / nrm
-                    d = ((P_.x - q.x) * uz - (P_.y - q.y) * ux) / B                   # metres; left of travel direction positive
-                    cr = next(((f, Lc) for f, Lc, pc in cr_polys if pc.contains(P_)), None)
-                    if cr and cr[0]['tags'].get('crossing') not in ('unmarked', 'no'):
-                        add(x, z, idx, 'minecraft:white_concrete' if int(cr[1].project(P_) / B) % 2 == 0 else 'minecraft:gray_concrete_powder', 'crossing', cr[0]['id'], 'mapped crossing; bar pattern = engineering choice'); continue
-                    thin = 0.5 * max(abs(ux), abs(uz)) / B                              # 1-block digital line (guide 4.4 thin lines)
-                    injunc = len({cc['id'] for cc in inside}) > 1 or any(jp.distance(P_) < r for jp, r in junc)
-                    mk = None
-                    if not injunc:
-                        for o, col, sty in c['marks']:
-                            if abs(d - o) < thin and (sty == 'solid' or ((s_ / B) % DASH_PERIOD) < DASH_ON): mk = (col, sty, o); break
-                    if mk: add(x, z, idx, 'minecraft:white_concrete' if mk[0] == 'white' else 'minecraft:yellow_concrete', 'marking', c['id'], f'{mk[0]} {mk[1]} line at {mk[2]:+.1f} m (US MUTCD convention; phase = distance along way)')
-                    else: add(x, z, idx, 'minecraft:cyan_terracotta' if hsh(x, z) % 4 == 0 else 'minecraft:gray_concrete_powder', 'pavement', c['id'], 'carriageway (width per feature report)')
+                x, z = x0 + i, z0 + j
+                if any(b.contains(Point(x + 0.5, z + 0.5)) for b in bld_mc): counts['skipped_under_building'] = counts.get('skipped_under_building', 0) + 1; continue
+                under_deck = (x, z) in OV['deck']
+                if TA and not under_deck:
+                    t, r, g = tgt(x, z)[:3]; med = False
+                    if t is None:
+                        t = sandwich(x, z); med = t is not None
+                        if med and r is None: r = ('minecraft:sand', 'median', KEY[0], 'enclosed median/landscape fill (desert landscaping ESTIMATE)')
+                        elif med: r = (r[0], r[1], r[2], r[3] + ' (enclosed by raised road)')
+                    if t is not None:
+                        nb = [top(x + dx, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+                        low = min(v for v in nb if v is not None) if any(v is not None for v in nb) else t
+                        edge = low < t - 1
+                        if t - 1 >= g + 1:
+                            fills.append([x, z, g + 1, t - 1, 'minecraft:light_gray_concrete' if edge else 'minecraft:stone', 'approach-wall' if edge else 'approach-fill', KEY[0],
+                                          ('retaining wall face (PROVISIONAL construction choice)' if edge else 'approach fill (hidden core)') + ' | existing ground below kept'])
+                        surfs.append([x, z, t, t, r[0], 'approach-surface', KEY[0], f"raised approach {r[1]}: {r[3]} | Y{t} (approach max grade {KEY[1]:.0%}; existing road buried, not removed)"])
+                        if edge and t - low >= 2: bars.append([x, z, t + 1, t + 1, 'minecraft:smooth_stone', 'approach-barrier', KEY[0], 'edge barrier on a drop of 2+ blocks (PROVISIONAL)'])
+                        counts['raised_' + r[1]] = counts.get('raised_' + r[1], 0) + 1
+                        continue
+                r = classify(x, z, M, BPM, only=OV['lower'] if under_deck else None)    # under a deck: only the roads that pass beneath it
+                if r is None:
+                    if under_deck: counts['skipped_under_deck (upper road is on the deck)'] = counts.get('skipped_under_deck (upper road is on the deck)', 0) + 1
                     continue
-                if ca: add(x, z, idx, 'minecraft:gray_concrete_powder', 'pavement', ca['id'], 'mapped area:highway (measured boundary)'); continue
-                cb = next((c for c, p in curbs if p.contains(P_)), None)
-                if cb: add(x, z, idx, 'minecraft:smooth_stone', 'curb', cb['id'], 'curb (ESTIMATE)'); continue
-                sm = next((f for f, p in sw_polys if p.contains(P_)), None) or next((g for g, p in sarea if p.contains(P_)), None)
-                if sm: add(x, z, idx, 'minecraft:light_gray_wool' if hsh(x, z) % 3 == 0 else 'minecraft:light_gray_concrete_powder', 'sidewalk', sm['id'], 'MAPPED sidewalk (width tag or 1.5 m ESTIMATE)'); continue
-                si = next((c for c in carr for bnd in c['inferred'] if bnd.contains(P_)), None)
-                if si: add(x, z, idx, 'minecraft:light_gray_wool' if hsh(x, z) % 3 == 0 else 'minecraft:light_gray_concrete_powder', 'sidewalk', si['id'], 'INFERRED sidewalk (sidewalk tag; 1.5 m ESTIMATE)')
+                cells.append([x, z, int(EY[(x, z)]), r[0], r[1], r[2], r[3]]); counts[r[1]] = counts.get(r[1], 0) + 1
+        OV['cells'] += fills + surfs + bars                       # fill and walls before surfaces: concrete powder is never set over air
+        # deck surface: same model, the deck's own ways and sidewalks, at the deck's explicit Y (never a top-block lookup)
+        deck_feats = []
+        if deck_mc and OV['cells']:
+            MD = build_model(deck_mc, [], BPM); deck_feats = MD['feats_out']
+            for c in OV['cells']:
+                if c[5] != 'deck': continue
+                r = classify(c[0], c[1], MD, BPM)
+                if r: c[4], c[7] = r[0], f"deck {r[1]}: {r[3]} | deck Y = world lower road Y + measured separation (vertical adjustment)"
         rpath = os.path.join(CACHE, 'roads', f'{CX}_{CZ}.json')
-        json.dump(dict(chunk=[CX, CZ], cells=cells, counts=counts, features=feats_out, unsupported=unsupported, blocks_per_metre=round(B, 4), data_source=SRC, pipeline=VERSION), open(rpath, 'w'))
-        out['roads'] = dict(status='ready' if (cells or feats_out) else 'no_roads', cells=len(cells), counts=counts, features=len(feats_out), unsupported=unsupported,
-                            message=(f'{len(feats_out)} mapped road way(s) within 60 m; {len(cells)} surface cells planned in this chunk' if feats_out
+        json.dump(dict(chunk=[CX, CZ], cells=cells, counts=counts, features=M['feats_out'] + deck_feats, unsupported=unsupported, blocks_per_metre=round(BPM, 4),
+                       data_source=SRC, pipeline=VERSION, style=STYLE), open(rpath, 'w'))
+        out['roads'] = dict(status='ready' if (cells or M['feats_out']) else 'no_roads', cells=len(cells), counts=counts, features=len(M['feats_out']), unsupported=unsupported,
+                            message=(f'{len(M["feats_out"])} mapped road way(s) within 60 m; {len(cells)} surface cells planned in this chunk' if M['feats_out']
                                      else 'No mapped road or sidewalk near this chunk in the ' + SRC.get('source', '?') + '.'))
+if WANT_ROADS or (WANT_OV and (OV['cells'] or OV['raised'])):
+    try: do_roads()
+    except Exception as ex:
+        log('roads pipeline error', ex)
+        if WANT_ROADS: out['roads'] = dict(status='pipeline_error', retry=True, message=f'roads preparation failed ({type(ex).__name__}: {ex}); other content is unaffected')
+    if not WANT_ROADS: out.pop('roads', None)                                             # overpass-only request: deck styling only
+if WANT_OV:
+    json.dump(dict(chunk=[CX, CZ], crossings=OV['reps'], cells=OV['cells'], pipeline=VERSION, style=STYLE), open(os.path.join(CACHE, 'overpass', f'{CX}_{CZ}.json'), 'w'))
+    reps = OV['reps']
+    if ov_err: st = 'pipeline_error'
+    elif OV['cells']: st = 'ready'
+    elif any(r['status'] == 'unresolved' for r in reps): st = 'unresolved'
+    elif any(r['status'] == 'ready' for r in reps): st = 'no_cells_here'
+    elif reps: st = 'not_enabled'
+    else: st = 'no_crossing'
+    msg = {'ready': f'{len(OV["cells"])} crossing cells planned in this chunk', 'no_cells_here': 'an enabled crossing is nearby but none of its blocks fall in this chunk',
+           'no_crossing': 'no grade-separated crossing reaches this chunk', 'not_enabled': 'nearby crossing is not on the overpass allowlist',
+           'unresolved': 'nearby crossing is unresolved (see report)', 'pipeline_error': f'overpass preparation failed ({ov_err}); other content is unaffected'}[st]
+    out['overpass'] = dict(status=st, cells=len(OV['cells']), crossings=[dict(key=r['key'], status=r['status'], reasons=r.get('reasons', [])) for r in reps],
+                           retry=st == 'pipeline_error' or any(r.get('retry') for r in reps), message=msg)
 geo.close()
 finish(**out)

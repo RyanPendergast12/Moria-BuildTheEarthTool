@@ -1,12 +1,12 @@
 name: SummerlinShellTool
-version: 0.3.0
+version: 0.4.2
 main: org.bte.summerlin.shelltool.ShellToolPlugin
 api-version: 1.18
 description: Snowball-triggered, chunk-bounded generation of building shells (air only) and roads (provenance-checked surface replacement) from local OSM + LiDAR data; Strip excluded.
 commands:
   shelltool:
     description: Summerlin shell/road tool
-    usage: /shelltool on|off|preview|content <shells|roads|both>|prepare [radius]|prefetch <on|off>|status|cancel|undo [job] [confirm]
+    usage: /shelltool on|off|preview|content <shells|roads|both|overpass>|prepare [radius]|prefetch <on|off>|status|cancel|undo [job] [confirm]
 permissions:
   summerlin.shelltool.use:
     description: Use the snowball shell tool. Granted by the plugin only to UUIDs in config allowed-players.

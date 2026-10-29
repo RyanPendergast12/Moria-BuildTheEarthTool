@@ -45,6 +45,7 @@ class Geo:
                     l = self.p.stdout.readline().strip()
                     if not l: raise RuntimeError('GeoServer exited')
                     if l == 'ok': break
+                    if l.startswith('WARNING'): continue          # JVM warnings can reach stdout before the first answer
                     vals.append(float(l))
         return np.array(vals)
     def close(self):
