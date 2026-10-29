@@ -59,10 +59,10 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     /** column segment. mode F fixed cells, W wall top-down to the real ground, G ground outline, R road surface cell (y0 = expected terrain) */
     record Seg(int x, int z, int y0, int y1, String block, char mode, String feature, String role, String label) {}
     record Placement(String job, String world, int x, int y, int z, String before, String after, String feature) {}
-    static final Set<String> OV_ROLES = Set.of("deck", "deck-soffit", "parapet", "median", "abutment", "pier", "approach-fill", "approach-wall", "approach-surface", "approach-barrier");
+    static final Set<String> OV_ROLES = Set.of("deck", "deck-soffit", "parapet", "median", "abutment", "pier", "approach-fill", "approach-wall", "approach-surface", "approach-barrier", "retire");
     static final Set<String> OV_WALL_ROLES = Set.of("abutment", "pier", "approach-fill", "approach-wall");            // built top-down to the real ground
     /** derived plans from any other preparation pipeline are re-prepared (old cached geometry cannot hide fixes) */
-    static final String PIPELINE = "shelltool_prep v4.2";
+    static final String PIPELINE = "shelltool_prep v4.3";
     static String contentOf(Seg s) { return s.mode() == 'R' ? "roads" : OV_ROLES.contains(s.role()) ? "overpass" : "shells"; }
 
     private double[] stripPoly, coverPoly;
@@ -73,7 +73,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     private String worldName, prepPython, prepScript; private File cacheDir;
     private int blocksPerTick, maxJobs, applyDelayTicks, maxPrepQueue, prepTimeoutS, prepWorkers, maxPrepareRadius, prefetchRadius;
     private long cooldownMs; private double placeMsPerTick;
-    private boolean overpassEnabled, overpassPiers; private double approachGrade; private List<String> overpassCrossings = List.of();
+    private boolean overpassEnabled, overpassPiers; private double approachGrade; private String overpassMode = "auto"; private List<String> overpassExclude = List.of(); private int minClearance = 4; private List<String> overpassCrossings = List.of();
     private final Set<UUID> allowed = new HashSet<>();
     private final Map<UUID, Mode> modes = new HashMap<>();
     private final Map<UUID, Content> contents = new HashMap<>();
@@ -120,11 +120,16 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         cacheDir = new File(getConfig().getString("cache-dir", new File(getDataFolder(), "cache").getPath()));
         for (String s : getConfig().getStringList("allowed-players")) allowed.add(UUID.fromString(s));
         overpassEnabled = getConfig().getBoolean("overpass-enabled", false);                // OFF by default
-        overpassCrossings = getConfig().getStringList("overpass-crossings");                // pilot allowlist
+        overpassCrossings = getConfig().getStringList("overpass-crossings");                // used in allowlist mode
+        overpassMode = getConfig().getString("overpass-mode", "auto").equalsIgnoreCase("allowlist") ? "allowlist" : "auto";   // auto: every eligible crossing
+        overpassExclude = getConfig().getStringList("overpass-exclude");
+        minClearance = Math.max(3, getConfig().getInt("overpass-min-clearance", 4));
         overpassPiers = getConfig().getBoolean("overpass-piers", false);                    // inferred piers OFF by default
         approachGrade = getConfig().getDouble("overpass-approach-grade", 0.0);              // raised approaches: 0 = not authorized
         if (approachGrade != 0 && (approachGrade < 0.04 || approachGrade > 0.10)) { getLogger().warning("overpass-approach-grade " + approachGrade + " outside 0.04..0.10: approaches disabled"); approachGrade = 0; }
-        if (overpassEnabled) getLogger().info("Overpass generation ENABLED for " + overpassCrossings + " (piers " + (overpassPiers ? "on" : "off") + ", approaches " + (approachGrade > 0 ? "grade " + approachGrade : "off") + ")");
+        if (overpassEnabled) getLogger().info("Overpass generation ENABLED: mode " + overpassMode + (overpassMode.equals("allowlist") ? " " + overpassCrossings : " (every eligible crossing)")
+                + (overpassExclude.isEmpty() ? "" : ", excluded " + overpassExclude) + ", min clearance " + minClearance + ", piers " + (overpassPiers ? "on" : "off")
+                + ", approaches " + (approachGrade > 0 ? "grade " + approachGrade : "off"));
         getCommand("shelltool").setExecutor(this); getCommand("shelltool").setTabCompleter(this);
         getServer().getPluginManager().registerEvents(this, this);
         for (Player p : Bukkit.getOnlinePlayers()) grant(p);
@@ -188,12 +193,76 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             return p.after().equals(cur.getAsString()) ? p.job() : null; }
         return null;
     }
+    /** protected-build rule for one crossing cell column: "x y z role: why", or null when the cells may be built */
+    String cellConflict(World w, int x, int z, int y0, int y1, BlockData target, String role, char mode, Set<Long> ent) {
+        if (inStrip(x, z)) return x + " " + y0 + " " + z + " " + role + ": Strip exclusion";
+        if (mode == 'F') {
+            for (int y = y0; y <= y1; y++) { Block b = w.getBlockAt(x, y, z);
+                if (toolTouched(x, y, z)) continue;          // the tool built here before: a later edit is preserved cell-by-cell by the writer
+                String why = null;
+                if (tracked.contains(pos(x, y, z))) why = "tracked player edit";
+                else if (ent.contains(pos(x, y, z))) why = "entity present";
+                else if (!b.getType().isAir() && !b.getBlockData().equals(target)
+                        && (ownerOf(w, x, y, z, b.getBlockData()) == null || b.getState() instanceof TileState)
+                        && !(role.equals("approach-surface") && GENERATOR_SURFACE.contains(b.getType()) && w.getBlockAt(x, y + 1, z).getType().isAir()))
+                    why = "existing block " + b.getType().getKey().getKey();
+                if (why != null) return x + " " + y + " " + z + " " + role + ": " + why;
+            }
+        } else {
+            for (int y = y1; y >= y0 - 3; y--) { Block b = w.getBlockAt(x, y, z);
+                if (tracked.contains(pos(x, y, z))) return x + " " + y + " " + z + " " + role + ": tracked player edit";
+                if (ent.contains(pos(x, y, z))) return x + " " + y + " " + z + " " + role + ": entity present";
+                if (!b.getType().isAir()) {
+                    if (b.getBlockData().equals(target) || y <= y0) break;
+                    if (y <= y1 && ownerOf(w, x, y, z, b.getBlockData()) != null && !(b.getState() instanceof TileState)) continue;   // own earlier work: upgraded in place
+                    return x + " " + y + " " + z + " " + role + ": column blocked by " + b.getType().getKey().getKey() + " above the expected ground";
+                }
+            }
+        }
+        return null;
+    }
+    // ---- whole-crossing preflight: every block of a crossing is checked (all its chunks) before ANY of it is placed
+    record Preflight(boolean ok, String summary, Set<Long> chunks, long at) {}
+    final Map<String, Preflight> preflights = new ConcurrentHashMap<>();
+    final Map<String, CompletableFuture<Preflight>> preflightRunning = new ConcurrentHashMap<>();
+    CompletableFuture<Preflight> preflight(String key, String file) {
+        Preflight p = preflights.get(key);
+        if (p != null && System.currentTimeMillis() - p.at() < 600_000) return CompletableFuture.completedFuture(p);
+        return preflightRunning.computeIfAbsent(key, k -> {
+            CompletableFuture<Preflight> res = new CompletableFuture<>();
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                Map<Long, List<JsonArray>> byChunk = new HashMap<>();
+                try { for (JsonElement e : gson.fromJson(Files.readString(Path.of(file)), JsonObject.class).getAsJsonArray("cells")) { JsonArray a = e.getAsJsonArray();
+                        byChunk.computeIfAbsent(key(a.get(0).getAsInt() >> 4, a.get(1).getAsInt() >> 4), q -> new ArrayList<>()).add(a); } }
+                catch (Exception ex) { Preflight f = new Preflight(false, "crossing plan unreadable: " + ex.getMessage(), Set.of(), System.currentTimeMillis()); preflightRunning.remove(k); res.complete(f); return; }
+                List<String> bad = Collections.synchronizedList(new ArrayList<>());
+                Bukkit.getScheduler().runTask(this, () -> {
+                    World w = Bukkit.getWorld(worldName); List<CompletableFuture<Void>> fs = new ArrayList<>();
+                    for (Map.Entry<Long, List<JsonArray>> en : byChunk.entrySet())
+                        fs.add(w.getChunkAtAsync((int) (en.getKey() >> 32), (int) (long) en.getKey()).thenAccept(c -> {
+                            for (JsonArray a : en.getValue()) {
+                                String why = cellConflict(w, a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt(), a.get(3).getAsInt(), data(a.get(4).getAsString()),
+                                        a.get(5).getAsString(), OV_WALL_ROLES.contains(a.get(5).getAsString()) ? 'W' : 'F', Set.of());
+                                if (why != null) bad.add(why);
+                            } }));
+                    CompletableFuture.allOf(fs.toArray(new CompletableFuture[0])).whenComplete((v, ex) -> {
+                        Preflight f = new Preflight(ex == null && bad.isEmpty(), ex != null ? "preflight failed: " + ex.getMessage()
+                                : bad.isEmpty() ? "whole crossing clear (" + byChunk.size() + " chunks)"
+                                : "crossing skipped: " + bad.size() + " protected/conflicting cell(s) across its " + byChunk.size() + " chunks, e.g. " + String.join("; ", bad.subList(0, Math.min(3, bad.size()))),
+                                byChunk.keySet(), System.currentTimeMillis());
+                        preflights.put(k, f); preflightRunning.remove(k); res.complete(f);
+                    });
+                });
+            });
+            return res;
+        });
+    }
     boolean toolTouched(int x, int y, int z) { List<Placement> l = byPos.get(pos(x, y, z)); if (l != null) for (Placement p : l) if (!undone.contains(p.job())) return true; return false; }
     boolean ovOn(Content c) { return c.overpass() || (overpassEnabled && c.roads()); }      // roads/both include enabled crossings
     String describe(Content c) {
         String ov = overpassEnabled ? " + enabled overpasses" : "";
         return switch (c) { case SHELLS -> "building shells"; case ROADS -> "roads" + ov; case BOTH -> "building shells + roads" + ov;
-            case OVERPASS -> "SPECIALIST: only the enabled crossing (no ordinary roads or shells)"; };
+            case OVERPASS -> "SPECIALIST: only eligible crossings (no ordinary roads or shells)"; };
     }
     String modeLine(UUID u) {
         Mode m = modes.getOrDefault(u, Mode.OFF); Content c = contents.getOrDefault(u, Content.SHELLS);
@@ -231,6 +300,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     }
     private void track(Block b) {
         if (!b.getWorld().getName().equals(worldName)) return;
+        long ck = key(b.getX() >> 4, b.getZ() >> 4); preflights.values().removeIf(p -> p.chunks().contains(ck));
         if (tracked.add(pos(b.getX(), b.getY(), b.getZ())))
             try { trackLog.write(worldName + " " + b.getX() + " " + b.getY() + " " + b.getZ() + " " + System.currentTimeMillis() + "\n"); trackLog.flush(); } catch (IOException ignored) {}
     }
@@ -277,7 +347,11 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             if (t.cancelled) continue;
             t.running = true; t.started = System.currentTimeMillis();
             List<String> cmd = new ArrayList<>(List.of(prepPython, prepScript, cacheDir.getPath(), String.valueOf(t.cx), String.valueOf(t.cz), "--content", t.content.arg()));
-            if (ovOn(t.content)) { cmd.add("--overpass-allow"); cmd.add(String.join(",", overpassCrossings)); if (overpassPiers) cmd.add("--piers");
+            if (ovOn(t.content)) {
+                if (overpassMode.equals("auto")) cmd.add("--overpass-auto"); else { cmd.add("--overpass-allow"); cmd.add(String.join(",", overpassCrossings)); }
+                if (!overpassExclude.isEmpty()) { cmd.add("--overpass-exclude"); cmd.add(String.join(",", overpassExclude)); }
+                cmd.add("--min-clearance"); cmd.add(String.valueOf(minClearance));
+                if (overpassPiers) cmd.add("--piers");
                 if (approachGrade > 0) { cmd.add("--approach-grade"); cmd.add(String.valueOf(approachGrade)); } }
             ProcessBuilder pb = new ProcessBuilder(cmd).redirectErrorStream(true);
             File logf = new File(cacheDir, "prep-logs" + File.separator + t.cx + "_" + t.cz + ".log"); logf.getParentFile().mkdirs(); pb.redirectOutput(logf);
@@ -305,7 +379,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     }
     Content missing(JsonObject m, Content want) {
         if (m != null && !(m.has("pipeline") && PIPELINE.equals(m.get("pipeline").getAsString()))) m = null;   // older derived plan: re-prepare
-        if (m != null && ovOn(want) && (!m.has("approach_grade") || m.get("approach_grade").getAsDouble() != approachGrade)) m = null;   // approach authorization changed
+        if (m != null && ovOn(want) && (!m.has("approach_grade") || m.get("approach_grade").getAsDouble() != approachGrade
+                || !m.has("overpass_mode") || !overpassMode.equals(m.get("overpass_mode").getAsString()))) m = null;   // approach authorization / mode changed
         if (want.overpass()) return sectionReady(m, "overpass") ? null : Content.OVERPASS;
         boolean ns = want.shells() && !sectionReady(m, "shells"),
                 nr = want.roads() && (!sectionReady(m, "roads") || (overpassEnabled && !sectionReady(m, "overpass")));
@@ -381,7 +456,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         int placed, wouldPlace, present, conflicts, idx; volatile String stage = "queued";
         long t0 = System.currentTimeMillis(), queueWaitMs, prepMs, placeNs, maxTickNs; JsonObject manifest; String shellStatus = "-", roadStatus = "-", overpassStatus = "-";
         final JsonArray crossings = new JsonArray(); final Map<String, String> crossingUnresolved = new TreeMap<>();
-        final List<String> details = new ArrayList<>(); final Map<String, int[]> byContent = new TreeMap<>();   // [placed|would, present, protected, upgraded]
+        final List<String> details = new ArrayList<>(); final Map<String, int[]> byContent = new TreeMap<>();
+        final Map<String, String> crossFiles = new TreeMap<>(), skippedCrossings = new TreeMap<>();   // [placed|would, present, protected, upgraded]
         int[] bc(Seg s) { return byContent.computeIfAbsent(contentOf(s), k -> new int[4]); }
         void pres(Seg s, int[] pf) { present++; pf[2]++; bc(s)[1]++; }
         BukkitTask task; Chunk chunk; volatile boolean done;
@@ -414,10 +490,24 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             if (content.shells()) loadShells(m);
             if (ovOn(content)) loadOverpass(m);
             for (Seg s : segs) perFeature.computeIfAbsent(s.feature(), f -> new int[4])[0]++;
-            Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {
+            Runnable go = () -> Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {
                 if (segs.isEmpty()) { finish(); return; }
                 stage = "placing"; w.getChunkAtAsync(cx, cz).thenAccept(this::start);
             });
+            if (crossFiles.isEmpty() || !ovOn(content)) { go.run(); return; }
+            stage = "crossing preflight";                    // all blocks of each crossing, in all its chunks, before any is placed
+            Map<String, CompletableFuture<Preflight>> pf = new TreeMap<>();
+            for (Map.Entry<String, String> e : crossFiles.entrySet()) pf.put(e.getKey(), preflight(e.getKey(), e.getValue()));
+            CompletableFuture.allOf(pf.values().toArray(new CompletableFuture[0])).thenRun(() -> Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {
+                for (Map.Entry<String, CompletableFuture<Preflight>> e : pf.entrySet()) {
+                    Preflight r = e.getValue().join();
+                    if (r.ok()) { notes.add(e.getKey() + ": " + r.summary()); continue; }
+                    int n = 0; for (Iterator<Seg> it = segs.iterator(); it.hasNext(); ) if (it.next().feature().equals(e.getKey())) { it.remove(); n++; }
+                    int[] f = perFeature.get(e.getKey()); if (f != null) f[3] += n;
+                    crossingUnresolved.put(e.getKey(), e.getKey() + " " + r.summary() + " - nothing of this crossing placed"); notes.add(e.getKey() + " " + r.summary());
+                }
+                go.run();
+            }));
         }
         private void loadShells(JsonObject m) {
             JsonObject s = m.has("shells") && m.get("shells").isJsonObject() ? m.getAsJsonObject("shells") : null;
@@ -471,6 +561,9 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
                 JsonObject r = gson.fromJson(Files.readString(f.toPath()), JsonObject.class);
                 for (JsonElement ce : r.getAsJsonArray("crossings")) {
                     JsonObject c = ce.getAsJsonObject(); crossings.add(c); String k = c.get("key").getAsString();
+                    if (c.has("cells_file") && c.has("cells_here") && c.get("cells_here").getAsInt() > 0) crossFiles.put(k, c.get("cells_file").getAsString());
+                    if (c.has("status") && !c.get("status").getAsString().equals("ready") && c.has("reasons") && c.getAsJsonArray("reasons").size() > 0)
+                        skippedCrossings.put(k, c.get("status").getAsString() + ": " + c.getAsJsonArray("reasons").get(0).getAsString());
                     featureInfo.put(k, "crossing " + c.get("status").getAsString() + (c.has("deck") ? " | deck Y " + c.getAsJsonObject("deck").get("y_min") + "-" + c.getAsJsonObject("deck").get("y_max")
                             + " = world lower road Y + measured separation (vertical adjustment, not absolute elevation)" : "") + (c.has("reasons") ? " " + c.get("reasons") : ""));
                     if (c.has("deck_ends")) for (JsonElement de : c.getAsJsonArray("deck_ends")) { JsonObject d = de.getAsJsonObject();
@@ -497,24 +590,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             Map<String, List<String>> bad = new TreeMap<>();
             for (Seg s : segs) {
                 if (!OV_ROLES.contains(s.role())) continue;
-                BlockData target = data(s.block()); String why = null; int wy = s.y1();
-                if (inStrip(s.x(), s.z())) why = "Strip exclusion";
-                else if (s.mode() == 'F') {
-                    for (int y = s.y0(); y <= s.y1() && why == null; y++) { wy = y; Block b = w.getBlockAt(s.x(), y, s.z());
-                        if (toolTouched(s.x(), y, s.z())) continue;    // the tool built here before: a later edit is preserved cell-by-cell by the writer, not a crossing conflict
-                        if (tracked.contains(pos(s.x(), y, s.z()))) why = "tracked player edit";
-                        else if (ent.contains(pos(s.x(), y, s.z()))) why = "entity present";
-                        else if (!b.getType().isAir() && !b.getBlockData().equals(target)
-                                && (ownerOf(w, s.x(), y, s.z(), b.getBlockData()) == null || b.getState() instanceof TileState)
-                                && !(s.role().equals("approach-surface") && GENERATOR_SURFACE.contains(b.getType()) && w.getBlockAt(s.x(), y + 1, s.z()).getType().isAir()))
-                            why = "existing block " + b.getType().getKey().getKey(); }
-                } else {
-                    for (int y = s.y1(); y >= s.y0() - 3 && why == null; y--) { wy = y; Block b = w.getBlockAt(s.x(), y, s.z());
-                        if (tracked.contains(pos(s.x(), y, s.z()))) why = "tracked player edit";
-                        else if (ent.contains(pos(s.x(), y, s.z()))) why = "entity present";
-                        else if (!b.getType().isAir()) { if (!b.getBlockData().equals(target) && y > s.y0()) why = "support column blocked by " + b.getType().getKey().getKey() + " above the expected ground"; break; } }
-                }
-                if (why != null) bad.computeIfAbsent(s.feature(), k -> new ArrayList<>()).add(s.x() + " " + wy + " " + s.z() + " " + s.role() + ": " + why);
+                String why = cellConflict(w, s.x(), s.z(), s.y0(), s.y1(), data(s.block()), s.role(), s.mode(), ent);
+                if (why != null) bad.computeIfAbsent(s.feature(), k -> new ArrayList<>()).add(why);
             }
             for (Map.Entry<String, List<String>> e : bad.entrySet()) {
                 int[] n = {0}; segs.removeIf(s -> { boolean r = s.feature().equals(e.getKey()); if (r) n[0]++; return r; });
@@ -525,11 +602,31 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             }
             if (!bad.isEmpty() && segs.isEmpty()) overpassStatus = "unresolved (conflict)";
         }
+        /** blocks this tool placed for a crossing under an EARLIER plan, absent from its current plan, still exactly as placed and not a
+         *  tracked player edit: restored to the exact recorded before-state (a ledgered upgrade of the original job, undoable). */
+        private void addRetirements() {
+            Set<String> keys = new HashSet<>(); Set<Long> planned = new HashSet<>();
+            for (Seg s : segs) if (OV_ROLES.contains(s.role())) { keys.add(s.feature()); for (int y = s.y0() - (s.mode() == 'W' ? 3 : 0); y <= s.y1(); y++) planned.add(pos(s.x(), y, s.z())); }
+            if (keys.isEmpty()) return;
+            List<Seg> add = new ArrayList<>();
+            for (Map.Entry<Long, List<Placement>> e : byPos.entrySet()) {
+                List<Placement> l = e.getValue(); Placement last = null;
+                for (int i = l.size() - 1; i >= 0; i--) if (!undone.contains(l.get(i).job())) { last = l.get(i); break; }
+                if (last == null || !keys.contains(last.feature()) || (last.x() >> 4) != cx || (last.z() >> 4) != cz || planned.contains(e.getKey())) continue;
+                if (last.after().startsWith("minecraft:air") || last.after().startsWith("minecraft:cave_air")) continue;   // already absent (e.g. an earlier retirement): nothing to retire
+                if (!last.world().equals(w.getName()) || tracked.contains(e.getKey())) continue;
+                Block b = w.getBlockAt(last.x(), last.y(), last.z());
+                if (!b.getBlockData().getAsString().equals(last.after()) || b.getState() instanceof TileState) continue;
+                add.add(new Seg(last.x(), last.z(), last.y(), last.y(), last.before(), 'X', last.feature(), "retire", "block of an earlier plan of this crossing, absent from its current plan: restored to its exact before-state"));
+            }
+            for (Seg s : add) { segs.add(s); perFeature.computeIfAbsent(s.feature(), f -> new int[4])[0]++; }
+            if (!add.isEmpty()) notes.add(add.size() + " block(s) of an earlier plan of this crossing retired (restored exactly; undoable)");
+        }
         int queuePos(PrepTask t) { int n = 0; for (PrepTask o : prepQueue) if (o.compareTo(t) < 0) n++; return n; }
         void start(Chunk c) {
             if (done) return;
             chunk = c; c.addPluginChunkTicket(ShellToolPlugin.this);
-            if (ovOn(content)) { precheckOverpass(); if (segs.isEmpty()) { finish(); return; } }
+            if (ovOn(content)) { precheckOverpass(); addRetirements(); if (segs.isEmpty()) { finish(); return; } }
             if (mode == Mode.APPLY) { JsonObject o = new JsonObject(); o.addProperty("type", "job"); o.addProperty("job", id);
                 String owner = who instanceof Player p ? p.getUniqueId().toString() : "console";
                 o.addProperty("owner", owner); o.addProperty("world", w.getName()); o.addProperty("cx", cx); o.addProperty("cz", cz); o.addProperty("content", content.arg()); log(o); flush(); jobOwner.put(id, owner); }
@@ -596,6 +693,11 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             while (idx < segs.size() && budget > 0 && System.nanoTime() - t < lim) {
                 Seg s = segs.get(idx++); BlockData target = data(s.block()); int[] pf = perFeature.get(s.feature());
                 if (s.mode() == 'R') { roadCell(s, target, pf); budget--; }
+                else if (s.mode() == 'X') {                    // retire: re-checked in the same tick it is written
+                    Block blk = w.getBlockAt(s.x(), s.y0(), s.z()); BlockData cur = blk.getBlockData(); String own = ownerOf(w, s.x(), s.y0(), s.z(), cur);
+                    if (own != null && !tracked.contains(pos(s.x(), s.y0(), s.z())) && !(blk.getState() instanceof TileState)) write(s, blk, cur, target, s.y0(), pf, own);
+                    else skip(s, s.y0(), "retire refused: block changed since placement (preserved)");
+                    budget--; }
                 else if (s.mode() == 'F') {
                     for (int y = s.y0(); y <= s.y1(); y++, budget--) { int r = airCell(s, y, target, pf); if (r == 1) { pres(s, pf); } else if (r == 2) skip(s, y, "non-air block (preserved)"); }
                 } else if (s.mode() == 'W') {
@@ -631,7 +733,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             r.addProperty("impact", ix + " " + iy + " " + iz); r.addProperty("chunk", cx + "," + cz);
             r.addProperty("chunk_block_bounds", "x " + (cx << 4) + ".." + ((cx << 4) + 15) + ", z " + (cz << 4) + ".." + ((cz << 4) + 15) + ", all heights");
             r.addProperty("shells_status", shellStatus); r.addProperty("roads_status", roadStatus); r.addProperty("overpass_status", overpassStatus);
-            if (ovOn(content)) { r.add("overpass_crossings", crossings); r.add("overpass_unresolved_in_chunk", gson.toJsonTree(crossingUnresolved)); }
+            if (ovOn(content)) { r.add("overpass_crossings", crossings); r.add("overpass_unresolved_in_chunk", gson.toJsonTree(crossingUnresolved)); r.add("overpass_skipped_nearby", gson.toJsonTree(skippedCrossings)); }
             r.add("by_content", gson.toJsonTree(byContent));
             if (manifest != null && manifest.has("data_source")) r.add("data_source", manifest.get("data_source"));
             JsonObject tm = new JsonObject(); tm.addProperty("queue_wait_s", queueWaitMs / 1000.0); tm.addProperty("preparation_s", prepMs / 1000.0);
@@ -663,7 +765,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             who.sendMessage("§b  " + sb);
             int nu = unsupported.size() + crossingUnresolved.size();
             if (nu > 0) who.sendMessage("§6  " + nu + " unsupported/unresolved: " + shortWhy(!crossingUnresolved.isEmpty() ? crossingUnresolved.values().iterator().next() : unsupported.get(0)));
-            if (!details.isEmpty() && mode == Mode.PREVIEW) who.sendMessage("§7  crossing: " + details.size() + " open deck end/approach item(s) - see report");
+            if (!skippedCrossings.isEmpty() && crossingUnresolved.isEmpty()) who.sendMessage("§7  bridge not generated: " + shortWhy(skippedCrossings.values().iterator().next()));
             who.sendMessage("§7  Report: plugins/SummerlinShellTool/reports/job-" + id + ".json");
             getLogger().info("job " + id + " " + gson.toJson(r));
         }
@@ -738,7 +840,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
                 if (u != null) say(s, modeLine(u));
                 say(s, "prefetch " + (u != null && prefetchOn.contains(u) ? "on" : "off")
                         + ", data " + (loaded ? "loaded" : "NOT loaded")
-                    + ", overpass " + (overpassEnabled ? "ENABLED for " + overpassCrossings + (overpassPiers ? " (piers on)" : " (piers off)") : "disabled")
+                    + ", overpass " + (overpassEnabled ? "ENABLED (" + overpassMode + (approachGrade > 0 ? ", approaches " + approachGrade : "") + ")" : "disabled")
                         + " | jobs " + activeChunks.size() + "/" + maxJobs + js + " | prep queue " + prepQueue.size() + "/" + maxPrepQueue + ", running " + prepByChunk.values().stream().filter(t -> t.running).count() + "/" + prepWorkers
                         + " | ledger jobs " + ledgerJobs.size() + " (" + undone.size() + " undone), placements " + ledgerJobs.values().stream().mapToInt(List::size).sum() + ", tracked edits " + tracked.size() + loc); }
             case "cancel" -> {

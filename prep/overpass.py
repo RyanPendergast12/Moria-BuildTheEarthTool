@@ -55,7 +55,10 @@ def crossing_of(feats, way_id):
     upper = sorted(comp)
     lower = sorted(i for i, f in by.items() if i not in br and f['tags'].get('highway') in CARRIAGE and f['tags'].get('tunnel', 'no') == 'no'
                    and _layer(f['tags']) < lay and any(f['geom'].crosses(by[u]['geom']) for u in upper))
-    return dict(upper=upper, lower=lower, layer=lay, key='x_' + '_'.join(upper))
+    key = 'x_' + '_'.join(upper)
+    if len(key) > 60:                                   # many-way structures: a stable short key (Windows path limits)
+        key = f"x_{upper[0]}_n{len(upper)}_{hashlib.sha1(key.encode()).hexdigest()[:10]}"
+    return dict(upper=upper, lower=lower, layer=lay, key=key)
 
 
 def plan(feats, cross, geo, lidar_fetch, cache_dir, piers=False, approach_grade=0.0):
@@ -77,9 +80,9 @@ def plan(feats, cross, geo, lidar_fetch, cache_dir, piers=False, approach_grade=
 def _with_approach(p, feats, cross, geo, grade, path):
     """raised approaches (approaches.py) for an authorized grade; computed once per crossing+grade and cached in the plan file"""
     if not grade or p.get('status') != 'ready': return p
-    if (p.get('approach') or {}).get('grade') != grade or (p.get('approach') or {}).get('model') != 'network-spread-v1':
+    if (p.get('approach') or {}).get('grade') != grade or (p.get('approach') or {}).get('model') != 'network-spread-v4':
         import approaches
-        a = approaches.plan_approaches(feats, cross, p, geo, grade); a['model'] = 'network-spread-v1'; p['approach'] = a
+        a = approaches.plan_approaches(feats, cross, p, geo, grade); a['model'] = 'network-spread-v4'; p['approach'] = a
         json.dump(p, open(path + '.tmp', 'w')); os.replace(path + '.tmp', path)
     return p
 
@@ -127,6 +130,8 @@ def _plan(by, cross, geo, lidar_fetch, piers_on):
         q = [w['p0'] + w['dv'] * s_ + w['nv'] * o_ for s_, o_ in ((w['s'][0], w['o'][0]), (w['s'][1], w['o'][0]), (w['s'][1], w['o'][1]), (w['s'][0], w['o'][1]))]
         deck_poly = deck_poly.union(Polygon(q))
     deck_poly = deck_poly.buffer(1.5, join_style=2).buffer(-1.5, join_style=2)   # close the sliver between per-way extents (one structure)
+    if deck_poly.geom_type != 'Polygon':
+        return _unresolved(f'geometry: the measured deck is {len(deck_poly.geoms)} separate structures; one connected deck per crossing is supported', lidar=lid)
     for lid_, L in LO.items():
         X0 = L.intersection(deck_poly)
         if X0.is_empty: continue

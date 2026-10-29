@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.4.3 (2026-10-29, prerelease): automatic overpasses
+- **Automatic mode** (`overpass-mode: auto`, the default once `overpass-enabled: true`): `roads` and `both` throws discover every carriageway bridge nearby, measure it and check eligibility. Eligible ones are built with their approaches; the rest are skipped with a specific reason in the report.
+  - The previous behaviour remains as `overpass-mode: allowlist`.
+  - `overpass-exclude` blocks individual crossings.
+  - `overpass-min-clearance` (default 4) sets the clearance rule.
+- **Eligibility checks** (`prep/crossings.py`): data quality, geometry (one connected deck, separation 4–15 m, deck vs OSM length, width), clearance, feasible approaches, overlap with neighbouring crossings or stacked bridges, and the Strip.
+- **Whole-crossing plans:** every block of a crossing is planned once and cached (`crossings/<key>.cells.json`), then clipped to the chunk.
+  - The road model and per-chunk generation moved to `prep/roadgen.py`.
+  - The Charleston regression is block-identical to v0.4.2: 45,728 blocks.
+- **Whole-crossing preflight** in the plugin: all of a crossing's blocks, in all its chunks, are checked against the protection rule before any is placed. One protected build anywhere skips the whole crossing, with the block named. The per-chunk check stays as the final guard.
+- **Fixed-road rule narrowed** to what the baseline requires: the crossing's lower roads plus other motorway/trunk mainlines stay fixed. A freeway that is itself the upper road may ramp.
+- **Fixed:**
+  - multi-structure decks no longer crash the plan (they are skipped with a reason);
+  - many-way structures get short stable keys (Windows path limit).
+- **Pipeline** `shelltool_prep v4.3`; the overpass mode is recorded per chunk.
+- **Approach junction fix:** the approach is also seeded at the **measured** deck end, and the bridge way itself joins the approach network. An OSM bridge longer than the measured deck no longer leaves a gap between deck and approach. The OSM end-node seed still drives the outward ramps, so the Charleston changes are confined to the deck-end junctions.
+- **The lower road is never raised or filled,** column by column. The whole-crossing planner refuses any plan that would cover a lower road ("approach would cover the lower road").
+- **Re-planning an already-built crossing:**
+  - Fill and wall columns may replace this tool's own unchanged blocks.
+  - Blocks of an earlier plan that the current plan no longer contains are **retired**: restored to their exact recorded before-state, ledgered as an upgrade (undoable), never a changed block or a tracked edit.
+  - Fixed before release: a retirement was itself being retired on the next throw.
+- **Known limitation:** a 2-block drop where the Desert Inn raised approach meets the existing road (-12160205, -5448042). The terrain model and the world surface differ by one block there. See `docs/TESTS-v0.4.3.md`.
+- **Tests:** 54 checks recorded, 48 pass. The 6 first-run failures are superseded by passing reruns, mapped in `docs/TESTS-v0.4.3.md`.
+
 ## v0.4.2 (2026-10-28): current version
 Raised approaches onto enabled overpasses ("Option C").
 - **New `prep/approaches.py`:** the required road height spreads from each deck end along the connected road network and drops at most `overpass-approach-grade` per block (tested at 0.06).

@@ -13,7 +13,7 @@ from pyproj import Transformer
 LL2U = Transformer.from_crs(4326, 32611, always_xy=True).transform
 CARRIAGE = {'motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link',
             'tertiary', 'tertiary_link', 'unclassified', 'residential', 'service', 'road'}
-FIXED_HW = {'motorway', 'trunk'}                       # mainlines: never raised
+FIXED_HW = {'motorway', 'trunk'}                       # mainlines: never raised - unless they continue the upper road itself
 STEP_M = 2.0
 
 def plan_approaches(fx, cross, plan, geo, grade):
@@ -21,7 +21,8 @@ def plan_approaches(fx, cross, plan, geo, grade):
     ends = {(e['way'], e['end']): max(e['deck_y']) for e in plan['deck_ends']}
     up = {f['id']: f for f in fx if f['id'] in upper}
     ways = [f for f in fx if f['kind'] == 'highway' and f['geom'].geom_type == 'LineString' and f['tags'].get('highway') in CARRIAGE
-            and f['id'] not in upper and f['tags'].get('bridge', 'no') == 'no' and f['tags'].get('tunnel', 'no') == 'no' and f['tags'].get('layer', '0') == '0']
+            and (f['id'] in upper or (f['tags'].get('bridge', 'no') == 'no' and f['tags'].get('tunnel', 'no') == 'no' and f['tags'].get('layer', '0') == '0'))]
+    # the bridge ways are part of the network: the OSM bridge can run past the measured deck, and that stretch must ramp too
     # samples
     pts, wid, key = [], [], {}
     adj = []
@@ -51,12 +52,24 @@ def plan_approaches(fx, cross, plan, geo, grade):
     # blocks per metre from the samples themselves (global for the crossing; a chunk-local value would make heights chunk-dependent)
     rs = [math.dist(mc[i], mc[j]) / d for i in range(0, len(pts), 25) for j, d in adj[i][:1] if d > 0.5]
     bpm = float(np.median(rs)) if rs else 1.0
-    fixed = [hw.get(wid[i]) in FIXED_HW or wid[i] in lower for i in range(len(pts))]
-    # seeds: the shared node of each deck end with its continuing at-grade way
+    # fixed: the crossing's lower roads (accepted baseline) and every OTHER motorway/trunk mainline. A mainline that continues the
+    # upper road itself (same ref or name, e.g. a freeway on the bridge) may ramp - that is the approach being generated.
+    ut = [f['tags'] for f in fx if f['id'] in upper]
+    cont = lambda t: any((t.get('ref') and t.get('ref') == u.get('ref')) or (t.get('name') and t.get('name') == u.get('name')) for u in ut)
+    tg = {f['id']: f['tags'] for f in ways}
+    fixed = [wid[i] in lower or (hw.get(wid[i]) in FIXED_HW and not cont(tg.get(wid[i], {}))) for i in range(len(pts))]
+    # seeds at deck height: (1) the OSM end node shared with the continuing at-grade way - this drives the outward ramps exactly as
+    # approved in v0.4.2; (2) the MEASURED deck end on the bridge way - the OSM bridge can run past the measured deck, and that short
+    # stretch is held at deck height (no gap between deck and approach)
     seeds = []
-    for (w, end), y in ends.items():
+    for e in plan['deck_ends']:
+        w, end, y = e['way'], e['end'], max(e['deck_y'])
         c = up[w]['geom'].coords[0 if end == 'start' else -1]; k = (round(c[0], 6), round(c[1], 6))
         if k in key: seeds.append((key[k], y, w, end))
+        cx, cz = (e['x'][0] + e['x'][1]) / 2 + 0.5, (e['z'][0] + e['z'][1]) / 2 + 0.5
+        eu = LL2U(*geo.inv([(cx, cz)])[0])
+        cand = [i for i in range(len(pts)) if wid[i] == w]
+        if cand: seeds.append((min(cand, key=lambda i: math.dist(utm[i], eu)), y, w, end + '/measured'))
     best = np.full(len(pts), -1e9); dist = np.full(len(pts), np.inf); src = [None] * len(pts); conflicts = []
     pq = []
     for i, y, w, end in seeds:

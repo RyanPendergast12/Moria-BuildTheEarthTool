@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.4.2 (alpha).** Download `SummerlinShellTool-0.4.2.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.4.2). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.4.2 (alpha).** **v0.4.3 (automatic overpasses) is a prerelease** awaiting in-game approval; see [docs/TESTS-v0.4.3.md](docs/TESTS-v0.4.3.md). Download from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.
@@ -54,25 +54,62 @@ snowball hits block ──► plugin (Java, server thread: checks, placement, un
 | `/shelltool status` | Mode, jobs, queue and coverage at your location. |
 | `/shelltool cancel` | Cancel your running and queued work. |
 | `/shelltool undo [job] [confirm]` | Dry run, then restore. |
-| `/shelltool content overpass` | **Specialist/debug mode.** Builds ONLY the enabled crossing; no ordinary roads or shells. For normal building use `roads` or `both`, which already include enabled crossings. |
+| `/shelltool content overpass` | **Specialist/debug mode.** Builds ONLY eligible crossings; no ordinary roads or shells. For normal building use `roads` or `both`, which already include enabled crossings. |
 
 **Permissions:**
 - `summerlin.shelltool.use` goes to the UUIDs in `config.yml` → `allowed-players`.
 - `summerlin.shelltool.admin` defaults to op.
 
-## Overpasses (off by default; allowlisted crossings only)
-A measured bridge deck, placed **into air only** above the world's existing roads:
-- **Height:** `deck Y = world lower-road Y + LiDAR-measured separation` (deck top, USGS class 17, minus lower road surface, class 2). This is a vertical adjustment to fit the world, not an absolute elevation. The world's freeway and terrain are never changed.
-- **Inferred, provisional parts:** deck thickness (2 blocks), parapets and abutments. Piers are **disabled** until their layout has evidence (`overpass-piers: false`). No support is ever placed inside a lower carriageway.
-- **Atomic per chunk:** if any cell of the crossing conflicts with an existing or tracked block in the chunk, nothing of it is placed there and the result is reported UNRESOLVED.
+## Overpasses (automatic mode; off by default)
+With `overpass-enabled: true` and `overpass-mode: auto`, a `roads` or `both` snowball automatically discovers every road bridge in the map data near the chunk. Each one is measured and checked; eligible ones are built (deck plus approaches), the rest are skipped with a specific reason. There is no per-bridge list to maintain.
+
+- `overpass-mode: allowlist` restricts generation to `overpass-crossings`.
+- `overpass-exclude` blocks individual crossings in either mode.
+
+### How a bridge is built
+- **Deck:** placed **into air only**. `deck Y = world lower-road Y + LiDAR-measured separation` (deck top, USGS class 17, minus lower road surface, class 2). This is a vertical adjustment to fit the world, not an absolute elevation. The lower road and its terrain are never changed.
+- **Inferred, provisional parts:** deck thickness (2 blocks), parapets and abutments. Piers stay **disabled** (`overpass-piers: false`) until their layout has evidence. No support is placed in a lower carriageway.
 - **Approaches** (`overpass-approach-grade`, 0 = off; allowed 0.04–0.10; tested at 0.06):
-  - The required height spreads from each deck end along every connected road, dropping at most the design grade per block until it meets the existing ground.
-  - Intersections become raised level areas, and every leg leaving them ramps down.
-  - Existing roads are buried under fill, not removed, so undo is exact.
-  - Raised edges get retaining walls and barriers, and enclosed medians are filled.
-  - Freeway mainlines and the crossing's lower roads are **never** raised. Any leg that would need that is reported as a conflict.
-  - With approaches off, deck ends stay open and are reported.
-- **Enabling:** `overpass-enabled: true` plus the crossing key in `overpass-crossings`. Only the W Charleston / CC-215 crossing is listed.
+  - The required height spreads from each deck end along the connected roads, dropping at most the grade per block until it meets the ground.
+  - Intersections become raised level areas, and their legs ramp down.
+  - Existing roads are buried under fill, not removed. Walls and barriers go on raised edges, and enclosed medians are filled.
+- **Planned as a whole:** a crossing's every block (deck plus approaches) is planned once, cached, and clipped to the thrown chunk. Results don't depend on throw order.
+- **Re-planning a built crossing:** the crossing's own unchanged blocks are upgraded in place. Blocks of an earlier plan that are no longer in the plan are retired to their exact before-state (undoable). Changed blocks and player edits are never touched.
+- **Whole-crossing protection:** before any block of a crossing is placed, the plugin checks **all** of its blocks in all its chunks. Any protected build anywhere means the whole crossing is skipped and the conflicting block is named, rather than built with a hole. The per-chunk check still guards every write.
+
+### Eligibility (each failed check is a specific skip reason in the job report)
+| check | rule |
+|---|---|
+| data | Enough bridge-deck LiDAR; ≤ 5 % of deck columns unmeasured; the lower road is measured on both sides of the deck (agreeing within 0.5 m); inside the local OSM index |
+| geometry | One connected deck. Measured upper/lower separation 4–15 m. Deck length 0.6–1.4 × the OSM bridge. Deck width ≤ 80 m per carriageway |
+| clearance | ≥ `overpass-min-clearance` air blocks (default 4) over every lower carriageway, across its full width |
+| approach | Approaches reach the ground without raising a fixed road: the crossing's **lower** roads (the accepted baseline) and every other motorway/trunk mainline. A freeway that is itself the upper road may ramp. With approaches off, every deck end must already meet its road. |
+| overlap | No other bridge crosses this bridge (stacked), and no neighbouring crossing's footprint (deck plus raised approaches) overlaps this one |
+| strip | The footprint stays outside the Strip exclusion (+500 blocks) |
+| protected builds | The plugin's whole-crossing preflight (above) |
+
+### Supported bridge types
+Simple **road-over-road grade separations**: one connected deck (single or twin carriageways, mapped bridge sidewalks) over at-grade roads. Supported cases include:
+- arterials over freeways;
+- streets over parkways;
+- a freeway over a street;
+- `layer=2` bridges where nothing else is stacked beneath.
+
+### Not supported (skipped with a reason)
+- Stacked or multi-level interchanges.
+- Decks that are several separate structures.
+- Bridges whose lower road is hidden or unmapped: washes, rail, paths, or no ground returns on one side.
+- Bridges outside LiDAR or local-index coverage.
+- Neighbouring crossings whose footprints overlap (no combined planning yet).
+- Tunnels.
+
+### Limitations
+- Approach steps follow whole blocks: a 6 % design grade is locally up to about 8 % where rounding puts two steps close together.
+- A ramp ends where the terrain model meets the approach. Where the world surface is one block lower than that model, the road drops 2 blocks. One known case: Desert Inn at -12160205, -5448042.
+- Retirement covers chunks that still contain the crossing's current plan. A leftover in a chunk the new plan no longer touches is not retired.
+- Bridge-crossing driveways and frontage connections follow the network spread, not hand-designed geometry.
+- The existing ground-level road paint under a deck is left as it was.
+- Survey of Summerlin (16 crossings): 9 eligible, 7 skipped with reasons. See `docs/OVERPASS-SURVEY.md`.
 
 - **Road details (v0.4.1, roadstyle-v2):** one marking and sidewalk model serves ground roads and decks. Each surface gets its own explicit elevation: freeway markings stay on the freeway, deck markings on the deck.
   - Palette: the builders' Las Vegas Blvd frontage at Bellagio, plus BTE Roads Guidebook p.63–64.
@@ -85,6 +122,9 @@ A measured bridge deck, placed **into air only** above the world's existing road
 Design notes and measurements:
 - `prep/overpass.py` (deck)
 - `prep/approaches.py` (raised approaches)
+- `prep/crossings.py` (automatic discovery, eligibility, whole-crossing plans)
+- `prep/roadgen.py` (road model and per-chunk generation)
+- `prep/ov_survey_auto.py` (eligibility survey over a candidate list)
 - `prep/ov_approach_plan.py` (read-only approach study)
 - `prep/ov_preview.py` (preview renderer)
 
