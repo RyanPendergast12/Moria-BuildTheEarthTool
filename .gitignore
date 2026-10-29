@@ -1,0 +1,14 @@
+# build output
+build/
+*.class
+*.jar
+# runtime data – never commit worlds, caches, ledgers or OSM extracts
+cache/
+*.sqlite
+*.osm.pbf
+ledger.jsonl
+tracked-edits.txt
+shells.txt
+world*/
+__pycache__/
+venv/

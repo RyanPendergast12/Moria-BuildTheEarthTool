@@ -1,0 +1,28 @@
+# SummerlinShellTool 0.3 - pilot test server only. Content default: shells (/shelltool content shells|roads|both).
+# The plugin disables itself unless the server listens on this port (pilot server = 25566; never the main Vegas server).
+required-server-port: 25566
+# Only this world may be written. Other worlds (and any NYC reference) are denied.
+world: world
+# Players granted summerlin.shelltool.use (no permissions plugin is installed).:
+allowed-players:
+  - 00000000-0000-0000-0000-000000000000   # replace with your Minecraft UUID
+# Accepted pilot shells (exported by scripts/shelltool_export.py from summerlin/pilot/plan_v1) + the Strip polygon.
+data-file: shells.txt
+# On-demand preparation for every other chunk (OSM footprints + USGS 3DEP LiDAR + BTE projection, SCAFFOLD-SPEC rules).
+prep-python: C:\BTE-Migration\venv\Scripts\python.exe
+prep-script: C:\BTE-Migration\scripts\shelltool_prep.py
+cache-dir: C:\BTE-Migration\shelltool\cache
+# Preparation scheduler: snowball builds always go before prefetch; one task per chunk (deduplicated).
+prep-workers: 2
+max-prep-queue: 32
+prep-timeout-seconds: 300
+# /shelltool prepare [radius] cap, and automatic prefetch radius while moving (when /shelltool prefetch on).
+max-prepare-radius: 3
+prefetch-radius: 1
+# Placement budget per server tick (whichever limit is hit first).
+blocks-per-tick: 400
+place-ms-per-tick: 8
+max-active-jobs: 3
+cooldown-ms: 3000
+# Delay between planning and the first applied batch (test hook for "edit between planning and apply"); 0-1 in normal use.
+apply-delay-ticks: 1
