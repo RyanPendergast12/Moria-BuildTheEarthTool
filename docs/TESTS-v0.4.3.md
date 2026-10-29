@@ -1,6 +1,6 @@
 # v0.4.3 acceptance record (automatic overpasses)
 
-**Status: prerelease.** Awaiting the in-game snowball test. The pilot stays on v0.4.2 until that test is approved.
+**Status: approved.** A real snowball test was run in-game on 2026-10-29: an ordinary buildings-and-roads chunk, and the never-configured Alta Drive over CC-215 crossing in automatic mode.
 
 ## Setup
 - **Server:** a disposable Paper 1.18.2 server (port 25570), copied from the approved v0.4.2 test world.

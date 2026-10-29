@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.3 (2026-10-29, prerelease): automatic overpasses
+## v0.4.3 (2026-10-29): automatic overpasses (current version)
 - **Automatic mode** (`overpass-mode: auto`, the default once `overpass-enabled: true`): `roads` and `both` throws discover every carriageway bridge nearby, measure it and check eligibility. Eligible ones are built with their approaches; the rest are skipped with a specific reason in the report.
   - The previous behaviour remains as `overpass-mode: allowlist`.
   - `overpass-exclude` blocks individual crossings.
@@ -24,7 +24,7 @@
 - **Known limitation:** a 2-block drop where the Desert Inn raised approach meets the existing road (-12160205, -5448042). The terrain model and the world surface differ by one block there. See `docs/TESTS-v0.4.3.md`.
 - **Tests:** 54 checks recorded, 48 pass. The 6 first-run failures are superseded by passing reruns, mapped in `docs/TESTS-v0.4.3.md`.
 
-## v0.4.2 (2026-10-28): current version
+## v0.4.2 (2026-10-28)
 Raised approaches onto enabled overpasses ("Option C").
 - **New `prep/approaches.py`:** the required road height spreads from each deck end along the connected road network and drops at most `overpass-approach-grade` per block (tested at 0.06).
   - Intersections become raised level areas; frontage roads, ramps and driveways ramp down from them.

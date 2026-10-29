@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.4.2 (alpha).** **v0.4.3 (automatic overpasses) is a prerelease** awaiting in-game approval; see [docs/TESTS-v0.4.3.md](docs/TESTS-v0.4.3.md). Download from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.4.3 (alpha): automatic overpasses.** Download `SummerlinShellTool-0.4.3.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.4.3). It was approved in-game on 2026-10-29; see [docs/TESTS-v0.4.3.md](docs/TESTS-v0.4.3.md). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.
