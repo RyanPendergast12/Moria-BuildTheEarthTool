@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.5.0 (2026-10-29, approved in-game): Egg tool for terrain, vegetation and agriculture
+- **New `/eggtool`**, separate from Snowball.
+  - An egg that hits a block selects a fixed 4×4-chunk tile, using floor division.
+  - Egg prepares real data off the server thread, then previews or generates terrain, vegetation and agriculture.
+  - Egg mode is OFF after login and restart. Hatching is suppressed only while Egg mode is on. An entity hit does nothing.
+- **Provenance:**
+  - the plugin snapshots every newly generated chunk (`egg-baseline/`);
+  - the pilot snapshot counts only for its 910 TerraPlusMinus-generated chunks;
+  - in the 329 converted purchased-world regions, only chunks absent from disk may be snapshotted.
+  - Columns are written only while still at baseline, with nothing changed in the 40 blocks above.
+- **Shared with Snowball:**
+  - one writer and ledger (contents `egg-terrain`, `egg-vegetation`, `egg-agriculture`);
+  - chunk locks in both directions;
+  - `upgrade_of` dependencies.
+- **Undo (Egg and Snowball):** both now keep tracked player edits, and Egg undo never buries or undermines later work.
+- **Retirement on re-planning** covers every chunk of the tile (the union of old and new footprints), so the Snowball plan-shrink limitation does not recur. Incomplete plans never retire anything.
+- **Prep:** `prep/egg_prep.py`, `egg_common.py`, `egg_provenance.py`, `egg_terrain.py`, `egg_vegetation.py`, `egg_agriculture.py`, `egg_landcover_index.py`.
+- **Vegetation catalog:** `veg-1`, 45 entries; TerraPlusMinus trees under MIT, plus authored Las Vegas plants.
+- **Specs** and a source inventory are in `docs/egg/`.
+- **BlueMap job events:** `egg-events-file`.
+- **Path overrides:** data paths can be set with `MORIA_*` environment variables.
+- **Roadmap:** v0.5 is Egg; portability moves to v0.6.
+
 ## v0.4.3 (2026-10-29): automatic overpasses (current version)
 - **Automatic mode** (`overpass-mode: auto`, the default once `overpass-enabled: true`): `roads` and `both` throws discover every carriageway bridge nearby, measure it and check eligibility. Eligible ones are built with their approaches; the rest are skipped with a specific reason in the report.
   - The previous behaviour remains as `overpass-mode: allowlist`.

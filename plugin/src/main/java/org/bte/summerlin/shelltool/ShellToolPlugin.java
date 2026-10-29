@@ -58,7 +58,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         String arg() { return name().toLowerCase(Locale.ROOT); } }
     /** column segment. mode F fixed cells, W wall top-down to the real ground, G ground outline, R road surface cell (y0 = expected terrain) */
     record Seg(int x, int z, int y0, int y1, String block, char mode, String feature, String role, String label) {}
-    record Placement(String job, String world, int x, int y, int z, String before, String after, String feature) {}
+    record Placement(String job, String world, int x, int y, int z, String before, String after, String feature, String role, String content) {}
     static final Set<String> OV_ROLES = Set.of("deck", "deck-soffit", "parapet", "median", "abutment", "pier", "approach-fill", "approach-wall", "approach-surface", "approach-barrier", "retire");
     static final Set<String> OV_WALL_ROLES = Set.of("abutment", "pier", "approach-fill", "approach-wall");            // built top-down to the real ground
     /** derived plans from any other preparation pipeline are re-prepared (old cached geometry cannot hide fixes) */
@@ -68,9 +68,9 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     private double[] stripPoly, coverPoly;
     private final Map<Long, List<Seg>> accepted = new HashMap<>();
     private final Set<String> acceptedIds = new HashSet<>();
-    private final Set<Long> pilotRoads = new HashSet<>(), tracked = ConcurrentHashMap.newKeySet();
-    private volatile boolean loaded;
-    private String worldName, prepPython, prepScript; private File cacheDir;
+    private final Set<Long> pilotRoads = new HashSet<>(); final Set<Long> tracked = ConcurrentHashMap.newKeySet();
+    volatile boolean loaded;
+    String worldName, prepPython, prepScript; File cacheDir;
     private int blocksPerTick, maxJobs, applyDelayTicks, maxPrepQueue, prepTimeoutS, prepWorkers, maxPrepareRadius, prefetchRadius;
     private long cooldownMs; private double placeMsPerTick;
     private boolean overpassEnabled, overpassPiers; private double approachGrade; private String overpassMode = "auto"; private List<String> overpassExclude = List.of(); private int minClearance = 4; private List<String> overpassCrossings = List.of();
@@ -79,14 +79,18 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     private final Map<UUID, Content> contents = new HashMap<>();
     private final Set<UUID> prefetchOn = new HashSet<>();
     private final Map<UUID, Long> lastThrow = new HashMap<>();
-    private final Map<Long, Job> activeChunks = new HashMap<>();
-    private final Map<String, List<Placement>> ledgerJobs = new LinkedHashMap<>();
-    private final Map<String, String> jobOwner = new HashMap<>();
-    private final Set<String> undone = new HashSet<>();
-    private final Map<Long, List<Placement>> byPos = new HashMap<>();                 // ownership: every recorded placement per position
-    private final Map<String, Set<String>> dependents = new HashMap<>();              // job -> later jobs that upgraded its blocks
+    final Map<Long, Job> activeChunks = new HashMap<>();
+    final Map<String, List<Placement>> ledgerJobs = new LinkedHashMap<>();
+    final Map<String, String> jobOwner = new HashMap<>();
+    final Set<String> undone = new HashSet<>();
+    final Map<Long, List<Placement>> byPos = new HashMap<>();                         // ownership: every recorded placement per position
+    final Map<String, Set<String>> dependents = new HashMap<>();                      // job -> later jobs that upgraded its blocks
+    // v0.5 Egg hooks (main thread only): chunk key -> Egg job holding it (Snowball submit/undo refuse these); ids of Egg jobs
+    final Map<Long, String> regionLocks = new HashMap<>();
+    final Set<String> eggJobs = new HashSet<>();
+    EggTool egg;
     private final Map<String, BlockData> bd = new HashMap<>();
-    private final AtomicInteger seq = new AtomicInteger();
+    final AtomicInteger seq = new AtomicInteger();
     private final AtomicLong prepSeq = new AtomicLong();
     private final Gson gson = new Gson();
     private Writer ledger, trackLog;
@@ -138,6 +142,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             loadTracked(); trackLog = Files.newBufferedWriter(trackPath(), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) { getLogger().severe("ledger/tracking unavailable, disabling: " + e); getServer().getPluginManager().disablePlugin(this); return; }
         for (int i = 0; i < prepWorkers; i++) { Thread t = new Thread(this::prepWorker, "ShellTool-prep-" + i); t.setDaemon(true); t.start(); workers.add(t); }
+        egg = new EggTool(this); getServer().getPluginManager().registerEvents(egg, this); getCommand("eggtool").setExecutor(egg); getCommand("eggtool").setTabCompleter(egg);
         File data = new File(getDataFolder(), getConfig().getString("data-file", "shells.txt"));
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try { loadAccepted(data); loaded = true; getLogger().info("Accepted pilot shells: " + acceptedIds.size() + " buildings; protected pilot road cells: " + pilotRoads.size() + "; tracked edits: " + tracked.size() + "; cache: " + cacheDir); }
@@ -146,6 +151,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     }
     @Override public void onDisable() {
         stopping = true;
+        if (egg != null) egg.stop();
         for (Job j : new ArrayList<>(activeChunks.values())) j.cancel("server stopping");
         for (PrepTask t : prepByChunk.values()) t.cancel();
         for (Thread t : workers) t.interrupt();
@@ -190,7 +196,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         List<Placement> l = byPos.get(pos(x, y, z)); if (l == null) return null;
         for (int i = l.size() - 1; i >= 0; i--) { Placement p = l.get(i);
             if (undone.contains(p.job()) || !p.world().equals(w.getName())) continue;
-            return p.after().equals(cur.getAsString()) ? p.job() : null; }
+            return p.after().equals(cur.getAsString()) || (p.content().startsWith("egg-") && sameModuloTicks(p.after(), cur)) ? p.job() : null; }
         return null;
     }
     /** protected-build rule for one crossing cell column: "x y z role: why", or null when the cells may be built */
@@ -285,10 +291,11 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             if (l.isBlank()) continue;
             JsonObject o = gson.fromJson(l, JsonObject.class); String t = o.get("type").getAsString(), job = o.get("job").getAsString();
             if (t.equals("place")) { Placement pl = new Placement(job, o.get("world").getAsString(),
-                    o.get("x").getAsInt(), o.get("y").getAsInt(), o.get("z").getAsInt(), o.get("before").getAsString(), o.get("after").getAsString(), o.get("feature").getAsString());
+                    o.get("x").getAsInt(), o.get("y").getAsInt(), o.get("z").getAsInt(), o.get("before").getAsString(), o.get("after").getAsString(), o.get("feature").getAsString(),
+                    o.has("role") ? o.get("role").getAsString() : "", o.has("content") ? o.get("content").getAsString() : "");
                 ledgerJobs.computeIfAbsent(job, k -> new ArrayList<>()).add(pl); byPos.computeIfAbsent(pos(pl.x(), pl.y(), pl.z()), k -> new ArrayList<>()).add(pl);
                 if (o.has("upgrade_of")) dependents.computeIfAbsent(o.get("upgrade_of").getAsString(), k -> new TreeSet<>()).add(job); }
-            else if (t.equals("job")) jobOwner.put(job, o.get("owner").getAsString());
+            else if (t.equals("job")) { jobOwner.put(job, o.get("owner").getAsString()); if (o.has("tool") && o.get("tool").getAsString().equals("egg")) eggJobs.add(job); }
             else if (t.equals("undo-done")) undone.add(job);
         }
     }
@@ -308,11 +315,11 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true) public void onBreak(BlockBreakEvent e) { track(e.getBlock()); }
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true) public void onBucket(PlayerBucketEmptyEvent e) { track(e.getBlock()); }
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true) public void onBucketFill(PlayerBucketFillEvent e) { track(e.getBlock()); }
-    private void log(JsonObject o) {
+    void log(JsonObject o) {
         o.addProperty("t", System.currentTimeMillis());
         try { ledger.write(gson.toJson(o)); ledger.write('\n'); } catch (IOException e) { getLogger().severe("ledger write failed: " + e); }
     }
-    private void flush() { try { ledger.flush(); } catch (IOException e) { getLogger().severe("ledger flush failed: " + e); } }
+    void flush() { try { ledger.flush(); } catch (IOException e) { getLogger().severe("ledger flush failed: " + e); } }
 
     // ---------------------------------------------------------------- preparation scheduler
     final class PrepTask implements Comparable<PrepTask> {
@@ -435,6 +442,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         if (w == null || !w.getName().equals(worldName)) { who.sendMessage("§c[ShellTool] Denied: only world '" + worldName + "' is allowed."); return; }
         int cx = x >> 4, cz = z >> 4; long k = key(cx, cz);                 // arithmetic shift = floor division (negatives correct)
         if (chunkInStrip(cx, cz)) { who.sendMessage("§c[ShellTool] PROTECTED: chunk " + cx + "," + cz + " is inside the Strip exclusion. Refused - nothing fetched or written."); return; }
+        if (regionLocks.containsKey(k)) { who.sendMessage("§e[ShellTool] Egg job " + regionLocks.get(k) + " is working on this tile (chunk " + cx + "," + cz + "). Try again after it finishes."); return; }
         if (activeChunks.containsKey(k)) { who.sendMessage("§e[ShellTool] A job is already running for chunk " + cx + "," + cz + "."); return; }
         if (activeChunks.size() >= maxJobs) { who.sendMessage("§e[ShellTool] Queue full (" + maxJobs + " active jobs)."); return; }
         String id = String.format("%tY%<tm%<td-%<tH%<tM%<tS-%d", new Date(), seq.incrementAndGet());
@@ -641,13 +649,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             labels.merge(s.role() + ": " + s.label(), 1, Integer::sum); int[] c = bc(s); c[0]++; if (upgradeOf != null) c[3]++;
             if (mode == Mode.PREVIEW) { wouldPlace++; pf[1]++; return; }
             String before = cur.getAsString(); blk.setBlockData(target, false); placed++; pf[1]++;
-            JsonObject o = new JsonObject(); o.addProperty("type", "place"); o.addProperty("job", id); o.addProperty("world", w.getName());
-            o.addProperty("x", s.x()); o.addProperty("y", y); o.addProperty("z", s.z()); o.addProperty("before", before); o.addProperty("after", target.getAsString());
-            o.addProperty("feature", s.feature()); o.addProperty("role", s.role()); o.addProperty("content", contentOf(s));
-            if (upgradeOf != null) { o.addProperty("upgrade_of", upgradeOf); dependents.computeIfAbsent(upgradeOf, k -> new TreeSet<>()).add(id); }
-            log(o);
-            Placement pl = new Placement(id, w.getName(), s.x(), y, s.z(), before, target.getAsString(), s.feature());
-            ledgerJobs.computeIfAbsent(id, k -> new ArrayList<>()).add(pl); byPos.computeIfAbsent(pos(s.x(), y, s.z()), k -> new ArrayList<>()).add(pl);
+            logPlace(id, w, s.x(), y, s.z(), before, target.getAsString(), s.feature(), s.role(), contentOf(s), upgradeOf);
         }
         /** shell cell: AIR/CAVE_AIR only, no entity. 0 written, 1 present, 2 non-air stop, 3 blocked */
         private int airCell(Seg s, int y, BlockData target, int[] pf) {
@@ -770,42 +772,82 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             getLogger().info("job " + id + " " + gson.toJson(r));
         }
     }
+    /** the one ledger 'place' record format (Snowball and Egg): appends the record and updates ownership/dependents. Caller flushes. */
+    Placement logPlace(String job, World w, int x, int y, int z, String before, String after, String feature, String role, String content, String upgradeOf) {
+        JsonObject o = new JsonObject(); o.addProperty("type", "place"); o.addProperty("job", job); o.addProperty("world", w.getName());
+        o.addProperty("x", x); o.addProperty("y", y); o.addProperty("z", z); o.addProperty("before", before); o.addProperty("after", after);
+        o.addProperty("feature", feature); o.addProperty("role", role); o.addProperty("content", content);
+        if (upgradeOf != null) { o.addProperty("upgrade_of", upgradeOf); dependents.computeIfAbsent(upgradeOf, k -> new TreeSet<>()).add(job); }
+        log(o);
+        Placement pl = new Placement(job, w.getName(), x, y, z, before, after, feature, role, content);
+        ledgerJobs.computeIfAbsent(job, k -> new ArrayList<>()).add(pl); byPos.computeIfAbsent(pos(x, y, z), k -> new ArrayList<>()).add(pl);
+        return pl;
+    }
+    /** vanilla random-tick properties (ARCHITECTURE §6): Egg-owned blocks of these materials compare equal ignoring them */
+    static final Set<String> TICK_PROPS = Set.of("moisture", "age", "stage", "distance");
+    static final Set<Material> TICKING = EnumSet.of(Material.FARMLAND, Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS, Material.SWEET_BERRY_BUSH,
+            Material.MELON_STEM, Material.PUMPKIN_STEM, Material.BAMBOO, Material.CACTUS, Material.SUGAR_CANE, Material.KELP, Material.COCOA, Material.NETHER_WART);
+    static boolean sameModuloTicks(String recordedAfter, BlockData cur) {
+        String c = cur.getAsString(); if (c.equals(recordedAfter)) return true;
+        Material m = cur.getMaterial(); String n = m.name();
+        if (!TICKING.contains(m) && !n.endsWith("_SAPLING") && !n.endsWith("_LEAVES")) return false;
+        int i = recordedAfter.indexOf('['), j = c.indexOf('[');
+        if (!(i < 0 ? recordedAfter : recordedAfter.substring(0, i)).equals(j < 0 ? c : c.substring(0, j))) return false;
+        return props(recordedAfter).equals(props(c));
+    }
+    private static Map<String, String> props(String s) {
+        Map<String, String> m = new TreeMap<>(); int i = s.indexOf('['); if (i < 0) return m;
+        for (String kv : s.substring(i + 1, s.length() - 1).split(",")) { String[] t = kv.split("=", 2); if (t.length == 2 && !TICK_PROPS.contains(t[0])) m.put(t[0], t[1]); }
+        return m;
+    }
     static String shortWhy(String t) { return t.length() > 110 ? t.substring(0, 107) + "..." : t; }
     static final Set<Material> GENERATOR_SURFACE = EnumSet.of(Material.SAND, Material.RED_SAND, Material.GRASS_BLOCK, Material.DIRT, Material.COARSE_DIRT,
             Material.GRAVEL, Material.STONE, Material.SANDSTONE, Material.RED_SANDSTONE, Material.TERRACOTTA, Material.PODZOL, Material.GRAY_CONCRETE_POWDER, Material.BRICKS, Material.MOSS_BLOCK);
 
     // ---------------------------------------------------------------- undo
-    private void undo(CommandSender s, String jobArg, boolean confirm) {
+    /** egg: Egg jobs only (/eggtool undo); otherwise Snowball jobs only */
+    void undo(CommandSender s, String jobArg, boolean confirm, boolean egg) {
         String owner = s instanceof Player p ? p.getUniqueId().toString() : null;
         String job = jobArg;
-        if (job == null) for (String j : ledgerJobs.keySet()) if (!undone.contains(j) && (owner == null || owner.equals(jobOwner.get(j)))) job = j;
-        if (job == null || !ledgerJobs.containsKey(job)) { s.sendMessage("§e[ShellTool] No undoable job" + (jobArg == null ? "" : " '" + jobArg + "'") + "."); return; }
+        if (job == null) for (String j : ledgerJobs.keySet()) if (!undone.contains(j) && eggJobs.contains(j) == egg && (owner == null || owner.equals(jobOwner.get(j)))) job = j;
+        if (job == null || !ledgerJobs.containsKey(job) || eggJobs.contains(job) != egg) { s.sendMessage("§e[ShellTool] No undoable job" + (jobArg == null ? "" : " '" + jobArg + "'") + "."); return; }
         if (owner != null && !owner.equals(jobOwner.get(job)) && !s.hasPermission(ADMIN)) { s.sendMessage("§c[ShellTool] That job is not yours."); return; }
         if (undone.contains(job)) { s.sendMessage("§e[ShellTool] Job " + job + " was already undone."); return; }
         List<String> live = new ArrayList<>(); for (String d : dependents.getOrDefault(job, Set.of())) if (!undone.contains(d)) live.add(d);
         if (!live.isEmpty()) { s.sendMessage("§e[ShellTool] Job " + job + " has later detail updates on its blocks (job(s) " + String.join(", ", live) + "). Undo those first, newest first; nothing changed."); return; }
         final String jb = job; List<Placement> ps = ledgerJobs.get(job); World w = Bukkit.getWorld(ps.get(0).world());
         Set<Long> chunks = new HashSet<>(); for (Placement p : ps) chunks.add(key(p.x() >> 4, p.z() >> 4));
-        for (long k : chunks) if (activeChunks.containsKey(k)) { s.sendMessage("§e[ShellTool] A job is running in that chunk; try again after it finishes."); return; }
-        List<Chunk> held = new ArrayList<>(); int[] restorable = {0}, modified = {0}, restored = {0};
+        for (long k : chunks) if (activeChunks.containsKey(k) || regionLocks.containsKey(k)) { s.sendMessage("§e[ShellTool] A job is running in that chunk" + (regionLocks.containsKey(k) ? " (Egg job " + regionLocks.get(k) + ")" : "") + "; try again after it finishes."); return; }
+        List<Chunk> held = new ArrayList<>(); int[] restorable = {0}, modified = {0}, restored = {0}, depKept = {0};
         Runnable run = () -> {
-            for (Placement p : ps) {
+            // re-check after the async chunk loads: a job may have locked these chunks or upgraded this job's blocks meanwhile
+            boolean locked = false; for (long k : chunks) locked |= activeChunks.containsKey(k) || regionLocks.containsKey(k);
+            List<String> live2 = new ArrayList<>(); for (String d : dependents.getOrDefault(jb, Set.of())) if (!undone.contains(d)) live2.add(d);
+            if (locked || !live2.isEmpty() || undone.contains(jb)) { for (Chunk c : held) c.removePluginChunkTicket(this);
+                s.sendMessage("§e[ShellTool] Undo of job " + jb + " aborted: " + (undone.contains(jb) ? "already undone" : locked ? "a job started in its chunks" : "later job(s) " + String.join(", ", live2) + " now depend on it") + " while loading chunks; nothing changed."); return; }
+            Map<String, Integer> order = new HashMap<>(); for (String j : ledgerJobs.keySet()) order.put(j, order.size());
+            Map<Long, Optional<EggTool.Ctx>> ctxs = new HashMap<>();
+            for (Placement p : egg ? reversed(ps) : ps) {                 // Egg may write one cell twice in a job (retire, then the new op): newest first
                 Block b = w.getBlockAt(p.x(), p.y(), p.z());
-                if (!b.getBlockData().getAsString().equals(p.after())) { modified[0]++; continue; }
+                if (tracked.contains(pos(p.x(), p.y(), p.z()))) { modified[0]++; continue; }        // a player edited this cell: never restored
+                if (!b.getBlockData().getAsString().equals(p.after()) && !(p.content().startsWith("egg-") && sameModuloTicks(p.after(), b.getBlockData()))) { modified[0]++; continue; }
+                if (egg && this.egg != null && this.egg.restoreBlocked(w, p, null, order, ctxs) != null) { depKept[0]++; continue; }   // later work rests on this column
                 restorable[0]++;
                 if (confirm) { b.setBlockData(Bukkit.createBlockData(p.before()), false); restored[0]++;
                     JsonObject o = new JsonObject(); o.addProperty("type", "undo"); o.addProperty("job", jb); o.addProperty("x", p.x()); o.addProperty("y", p.y()); o.addProperty("z", p.z()); log(o); }
             }
-            if (confirm) { JsonObject o = new JsonObject(); o.addProperty("type", "undo-done"); o.addProperty("job", jb); o.addProperty("restored", restored[0]); o.addProperty("kept_modified", modified[0]); log(o); flush(); undone.add(jb); }
+            if (confirm) { JsonObject o = new JsonObject(); o.addProperty("type", "undo-done"); o.addProperty("job", jb); o.addProperty("restored", restored[0]); o.addProperty("kept_modified", modified[0]); if (egg) o.addProperty("kept_column", depKept[0]); log(o); flush(); undone.add(jb); }
             for (Chunk c : held) c.removePluginChunkTicket(this);
             s.sendMessage("§b[ShellTool] Undo " + (confirm ? "" : "DRY RUN ") + "job " + jb + ": " + ps.size() + " recorded placements, "
                     + (confirm ? "restored " + restored[0] : "would restore " + restorable[0]) + " to their exact before-state, kept (changed since placement) " + modified[0]
-                    + (confirm ? "" : ". Run '/shelltool undo " + jb + " confirm' to apply."));
+                    + (egg ? ", kept (later work depends on its column) " + depKept[0] : "")
+                    + (confirm ? "" : ". Run '/" + (egg ? "eggtool" : "shelltool") + " undo " + jb + " confirm' to apply."));
         };
         List<CompletableFuture<Chunk>> fs = new ArrayList<>();
         for (long k : chunks) fs.add(w.getChunkAtAsync((int) (k >> 32), (int) k).thenApply(c -> { c.addPluginChunkTicket(this); held.add(c); return c; }));
         CompletableFuture.allOf(fs.toArray(new CompletableFuture[0])).thenRun(() -> Bukkit.getScheduler().runTask(this, run));
     }
+    static <T> List<T> reversed(List<T> l) { List<T> r = new ArrayList<>(l); Collections.reverse(r); return r; }
 
     // ---------------------------------------------------------------- commands
     @Override public boolean onCommand(CommandSender s, Command c, String label, String[] a) {
@@ -850,7 +892,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
                 say(s, n + " job(s) and " + q + " preparation task(s) cancelled."); }
             case "undo" -> { String job = null; boolean confirm = false;
                 for (int i = 1; i < a.length; i++) if (a[i].equalsIgnoreCase("confirm")) confirm = true; else job = a[i];
-                undo(s, job, confirm); }
+                undo(s, job, confirm, false); }
             case "sim" -> {
                 if (!s.hasPermission(ADMIN)) return say(s, "Admin only.");
                 if (a.length < 5) return say(s, "/shelltool sim <x> <y> <z> <preview|apply> [shells|roads|both]");

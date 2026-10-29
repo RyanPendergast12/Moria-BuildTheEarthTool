@@ -1,4 +1,4 @@
-# Setup (v0.4.3)
+# Setup (v0.5.0)
 
 This guide reproduces the reference setup: Windows, Paper 1.18.2, TerraPlusMinus, and the Clark County, Nevada data. Steps marked **⚠ hard-coded** need a source edit until the portability work lands ([ROADMAP.md](ROADMAP.md)).
 
@@ -45,7 +45,7 @@ The index is optional, but it is much faster: about 10 s per new chunk, against 
    ```
    The last argument is the coverage box (west, south, east, north in lon/lat). Inside the box, a missing feature means "not mapped in OSM". Outside it, the tool falls back to Overpass.
 
-## 5. Paths and region settings (⚠ still hard-coded in v0.4.3)
+## 5. Paths and region settings (⚠ still hard-coded in v0.5.0)
 | file | line / setting | what it is |
 |---|---|---|
 | `prep/shelltool_prep.py` | `INDEX = ...` | Path to the OSM index |
@@ -68,20 +68,20 @@ POLY strip <x1> <z1> <x2> <z2> <x3> <z3> ...
 - Make it match `strip_mc` in your `polygons.json`, because the plugin and the prep worker check it independently.
 
 ## 7. Get the plugin
-**Easiest:** download `SummerlinShellTool-0.4.3.jar` from the [v0.4.3 release](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.4.3).
+**Easiest:** download `SummerlinShellTool-0.5.0.jar` from the [v0.5.0 release](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.5.0).
 
 **Or build it.** No Gradle or Maven yet. Compile against the JARs in your Paper server's `libraries` folder, after the server has been started once. In PowerShell:
 ```powershell
 cd plugin
 $cp = (Get-ChildItem <server>\libraries -Recurse -Filter *.jar).FullName -join ';'
-javac --release 17 -nowarn -cp $cp -d build\classes src\main\java\org\bte\summerlin\shelltool\ShellToolPlugin.java
+javac --release 17 -nowarn -cp $cp -d build\classes (Get-ChildItem src\main\java -Recurse -Filter *.java).FullName
 copy src\main\resources\*.yml build\classes\
-jar cf SummerlinShellTool-0.4.3.jar -C build\classes .
+jar cf SummerlinShellTool-0.5.0.jar -C build\classes .
 ```
 
 ## 8. Install and configure
 1. Stop the server with `stop`. Don't close the window.
-2. Copy `SummerlinShellTool-0.4.3.jar` into `<server>\plugins\`, and remove any older `SummerlinShellTool-*.jar`.
+2. Copy `SummerlinShellTool-0.5.0.jar` into `<server>\plugins\`, and remove any older `SummerlinShellTool-*.jar`.
 3. Start the server once. This creates `plugins\SummerlinShellTool\config.yml`. Then stop it again.
 4. Edit `config.yml`:
    - `required-server-port`: your server's port. The plugin disables itself on any other port, which stops it running on the wrong server by accident.
@@ -96,7 +96,7 @@ jar cf SummerlinShellTool-0.4.3.jar -C build\classes .
      - `overpass-piers` stays `false` (inferred piers).
      - `overpass-approach-grade` sets raised approaches: 0 = off, 0.04–0.10 allowed, tested at 0.06.
 5. Copy `shells.txt` to `plugins\SummerlinShellTool\`.
-6. Start the server. The log should show `Enabling SummerlinShellTool v0.4.3`, with no error after it.
+6. Start the server. The log should show `Enabling SummerlinShellTool v0.5.0`, with no error after it.
 
 ## 9. First use
 ```

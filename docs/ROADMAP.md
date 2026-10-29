@@ -4,7 +4,12 @@
 - [x] Grade-separated crossings: a measured deck fitted to the world, raised approaches, chunk-safe planning (v0.4.0–v0.4.2).
 - [x] One snowball workflow: roads/both include enabled crossings; independent preparation pipelines (v0.4.1).
 
-## v0.5 – portable (no source edits needed)
+## v0.5 – Egg: terrain, vegetation and agriculture (released 2026-10-29)
+- [x] A separate egg tool: an egg that hits a block selects a fixed 4×4-chunk tile, then prepares and previews or generates terrain correction, vegetation and agriculture. See `docs/egg/ARCHITECTURE.md`.
+- [x] Shared protected writer, ledger, locks and undo with Snowball. Retirement covers every chunk of the tile.
+- [x] Portability carried in v0.5 only where Egg needs it: data paths can be overridden by `MORIA_*` environment variables (`prep/egg_common.py`) and `egg-*` config keys.
+
+## v0.6 – portable (no source edits needed)
 - [ ] One config for everything: move every hard-coded path into `config.yml`, and have the plugin pass them to the prep worker. These are:
   - the OSM index;
   - the protected-zone polygons;
@@ -19,7 +24,7 @@
 - [ ] `requirements.txt` and a one-click `setup.bat` / `setup.sh`.
 - [ ] Use the permissions plugin when one is present (LuckPerms nodes), alongside `allowed-players`.
 
-## v0.6 – easy install
+## v0.7 – easy install
 - [ ] Remove the Python dependency: port preparation to Java inside the plugin. This is the biggest barrier for other server owners.
   - Shapely becomes JTS. pyproj and TerraPlusMinus are already Java.
   - LAZ decoding needs a Java reader.
@@ -28,7 +33,7 @@
 
 ## Later
 - [ ] Heights outside the US: building heights from OSM `height` / `building:levels` tags, and other national LiDAR or DSM sources.
-- [ ] More content types: trees from OSM `natural=tree`, landuse ground textures, parking lots.
+- [ ] More content types: parking lots and other ground textures. Trees and landuse are in v0.5 Egg.
 - [ ] Builder workflow: claim a chunk or area, give review status, and export a progress map.
 
 ## Not planned

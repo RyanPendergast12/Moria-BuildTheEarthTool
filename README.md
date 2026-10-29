@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.4.3 (alpha): automatic overpasses.** Download `SummerlinShellTool-0.4.3.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.4.3). It was approved in-game on 2026-10-29; see [docs/TESTS-v0.4.3.md](docs/TESTS-v0.4.3.md). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.5.0 (alpha): the Egg tool for terrain, vegetation and agriculture.** Download `SummerlinShellTool-0.5.0.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.5.0). It was approved in-game on 2026-10-29; see [docs/egg/TESTS-v0.5.md](docs/egg/TESTS-v0.5.md). Snowball (shells, roads, overpasses) is unchanged from v0.4.3 apart from undo now keeping tracked player edits. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.
@@ -59,6 +59,34 @@ snowball hits block ──► plugin (Java, server thread: checks, placement, un
 **Permissions:**
 - `summerlin.shelltool.use` goes to the UUIDs in `config.yml` → `allowed-players`.
 - `summerlin.shelltool.admin` defaults to op.
+
+## Egg: terrain, vegetation and agriculture (v0.5)
+Snowball stays the tool for shells, roads and overpasses. **Egg** is a separate tool for the ground:
+- A thrown egg that hits a block selects one fixed **4×4-chunk tile** (64×64 blocks).
+- Egg prepares real data for that tile and previews or generates:
+  - **terrain correction** toward USGS 3DEP lidar ground, bounded to ±2 blocks;
+  - **vegetation**: mapped OSM trees and tree rows, measured lidar canopy and sparse desert plants;
+  - **agriculture**: OSM farmland, orchard, vineyard and meadow polygons.
+- It writes only inside the tile, through the same protected writer and undo ledger as Snowball.
+
+| command | effect |
+|---|---|
+| `/eggtool content terrain\|vegetation\|agriculture\|all` | What a throw generates (default `all`). |
+| `/eggtool preview` / `on` / `off` | Report only, build, or vanilla eggs. **OFF after every login and restart.** Hatching is suppressed only while Egg mode is on. |
+| `/eggtool prepare` | Prepare the tile you stand in; nothing is placed. |
+| `/eggtool status` / `cancel` | Jobs, queue, the tile at your position; cancel your work. A cancelled job stays undoable. |
+| `/eggtool undo [job] [confirm]` | Dry run, then restore the exact earlier state. Later edits are kept. |
+
+**Safety:**
+- Egg changes ground only where it has **positive evidence the ground is untouched**: a snapshot taken when TerraPlusMinus generated the chunk, or the 910 pilot-generated chunks. Matching sand is never proof.
+- Roads, buildings, Snowball work, player edits, containers, entities, water, landscaping and the Strip are protected. Existing vegetation is kept.
+- Every cell is re-checked just before it is written.
+
+Details:
+- [docs/egg/COMMANDS.md](docs/egg/COMMANDS.md): commands and configuration.
+- [docs/egg/ARCHITECTURE.md](docs/egg/ARCHITECTURE.md): how the pieces fit together.
+- Specs: [terrain](docs/egg/TERRAIN-SPEC.md), [vegetation](docs/egg/VEGETATION-SPEC.md), [agriculture](docs/egg/AGRICULTURE-SPEC.md).
+- Tests: [docs/egg/TESTS-v0.5.md](docs/egg/TESTS-v0.5.md).
 
 ## Overpasses (automatic mode; off by default)
 With `overpass-enabled: true` and `overpass-mode: auto`, a `roads` or `both` snowball automatically discovers every road bridge in the map data near the chunk. Each one is measured and checked; eligible ones are built (deck plus approaches), the rest are skipped with a specific reason. There is no per-bridge list to maintain.

@@ -41,3 +41,38 @@ overpass-crossings:
 overpass-piers: false
 # Raised approaches onto enabled decks (fill, retaining walls, raised intersections): 0 = not authorized. Allowed 0.04-0.10.
 overpass-approach-grade: 0
+
+# ---- Egg tool (v0.5): one 64x64 tile (4x4 chunks) per egg block hit. See docs/egg/COMMANDS.md and docs/egg/ARCHITECTURE.md.
+egg-enabled: true
+# Tile preparation orchestrator (run with prep-python; arguments: <cache-dir> <tx> <tz> --content ... --seed ... --max-cut ... --max-fill ... --max-ops ...).
+egg-prep-script: C:\BTE-Migration\repo\Moria-BuildTheEarthTool\prep\egg_prep.py
+# Approved baseline world for provenance (passed to the prep as MORIA_BASELINE_WORLD); empty = egg_common default.
+egg-baseline-world: ''
+# Dedicated Egg preparation workers (1-2), queue bound for /eggtool prepare, and per-tile timeout (killed and reported as a provider/timeout failure).
+egg-prep-workers: 1
+egg-max-prep-queue: 16
+egg-prep-timeout-seconds: 600
+# Concurrent Egg jobs (each holds all 16 chunks of its tile; Snowball refuses those chunks meanwhile).
+egg-max-jobs: 2
+# Generator limits: deepest terrain cut / highest fill (blocks), and plans with more ops than this are refused_limits.
+egg-max-cut: 2
+egg-max-fill: 2
+egg-max-ops-per-tile: 12000
+# Placement budget per server tick (whichever limit is hit first).
+egg-blocks-per-tick: 300
+egg-place-ms-per-tick: 6
+# Deterministic generator seed, and minimum time between two egg throws of one player.
+egg-seed: 1
+egg-cooldown-ms: 3000
+# BlueMap status events (one JSON line per job status change); empty = off. The plugin never touches BlueMap itself.
+egg-events-file: ''
+# Capture the untouched state of every chunk NEWLY generated in 'world' (plugins/SummerlinShellTool/egg-baseline/<cx>_<cz>.json, first capture wins).
+# Provenance for tiles outside the approved pilot baseline snapshot; passed to the prep as MORIA_EGG_CAPTURED.
+egg-capture-baseline: true
+# Regions of the converted/purchased world (one region file name per line, e.g. r.-23718.-10620.mca; '#' comments; relative to the data folder).
+# In these regions ONLY chunks absent from disk before the load are captured (their proto chunks contain converted builds). If this list is
+# configured but missing/unreadable, nothing is captured in any region file that existed at plugin start (fail-safe). '' = no list.
+egg-capture-protected-regions: egg-converted-regions.txt
+# Generate missing tile chunks before preparation/apply (one at a time per job). CAVEAT: TerraPlusMinus generation can hang a server
+# that is stopping mid-generation - stop the server only when /eggtool status shows no Egg jobs. false = tiles with ungenerated chunks are refused.
+egg-generate-missing: true

@@ -1,5 +1,5 @@
 name: SummerlinShellTool
-version: 0.4.3
+version: 0.5.0
 main: org.bte.summerlin.shelltool.ShellToolPlugin
 api-version: 1.18
 description: Snowball-triggered, chunk-bounded generation of building shells (air only) and roads (provenance-checked surface replacement) from local OSM + LiDAR data; Strip excluded.
@@ -7,10 +7,13 @@ commands:
   shelltool:
     description: Summerlin shell/road tool
     usage: /shelltool on|off|preview|content <shells|roads|both|overpass>|prepare [radius]|prefetch <on|off>|status|cancel|undo [job] [confirm]
+  eggtool:
+    description: Egg tool (v0.5) - terrain, vegetation and agriculture for one 64x64 tile (4x4 chunks)
+    usage: /eggtool on|off|preview|content <terrain|vegetation|agriculture|all>|prepare|status|cancel|undo [job] [confirm]
 permissions:
   summerlin.shelltool.use:
-    description: Use the snowball shell tool. Granted by the plugin only to UUIDs in config allowed-players.
+    description: Use the snowball shell tool and the Egg tool. Granted by the plugin only to UUIDs in config allowed-players.
     default: false
   summerlin.shelltool.admin:
-    description: Test hook /shelltool sim, undo other players' jobs, cancel any job (console and ops).
+    description: Test hooks (/shelltool sim*, /eggtool simset|simthrow|simprepare|simentityhit|simhatch), undo other players' jobs, cancel any job (console and ops).
     default: op
