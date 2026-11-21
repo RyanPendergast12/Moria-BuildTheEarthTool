@@ -1,0 +1,65 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-1x2-stripe3",
+ "version": "1.0.0",
+ "title": "Window 1x2, inset, 3-stripe frame",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "top",
+    "type": "top",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "bottom",
+    "type": "bottom",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Three or more horizontal stripes: thin trapdoor/slab lines at the top of the lowest row and the bottom of the highest row divide the glass into stripes (Detail p.13). Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

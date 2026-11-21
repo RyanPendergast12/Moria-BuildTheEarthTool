@@ -1,0 +1,75 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-frame-g",
+ "version": "1.0.0",
+ "title": "Red Rock cream frame, 10-row base",
+ "size": {
+  "u": 1,
+  "v": 10
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 4,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 5,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 6,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 7,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 8,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 9,
+   "w": 0,
+   "role": "frame"
+  }
+ ],
+ "notes": "Cream frame / plinth band under the tower glass (rr-c2006-towerw; lower floors poorly covered). (Detail p.30). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

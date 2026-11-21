@@ -1,0 +1,118 @@
+{
+ "schema": "facade-style-1",
+ "id": "summerlin-stucco-retail",
+ "version": "1.0.0",
+ "kind": "style",
+ "title": "Summerlin stucco retail (1-2 storey)",
+ "label": "STYLE-GENERATED (not observed)",
+ "license": "original (Moria)",
+ "evidence": {
+  "class": "style"
+ },
+ "applies_to": {
+  "building": [
+   "retail",
+   "commercial",
+   "yes"
+  ],
+  "max_levels": 2,
+  "min_face_len": 6
+ },
+ "palette": "lib:summerlin-stucco-tan",
+ "components": {
+  "storefront": {
+   "ref": "lib:storefront-bay"
+  },
+  "door": {
+   "ref": "lib:door-double"
+  },
+  "window": {
+   "ref": "lib:window-2x2-inset"
+  },
+  "sill": {
+   "ref": "lib:sill"
+  },
+  "canopy": {
+   "ref": "lib:canopy-flat-d2"
+  },
+  "band": {
+   "ref": "lib:floor-band"
+  },
+  "parapet": {
+   "ref": "lib:parapet-cap"
+  },
+  "corner": {
+   "ref": "lib:corner-wrap"
+  },
+  "pier": {
+   "ref": "lib:column-1x1"
+  }
+ },
+ "defaults": {
+  "exterior": {
+   "floors": {
+    "base_v": 0,
+    "height": 4,
+    "count": "auto"
+   },
+   "bays": {
+    "width": 6,
+    "residual": "center"
+   },
+   "ground": {
+    "openings": [
+     {
+      "component": "storefront",
+      "bays": "all",
+      "u_inset": 1
+     },
+     {
+      "component": "door",
+      "bays": "center"
+     }
+    ],
+    "canopy": {
+     "component": "canopy",
+     "v": 4
+    },
+    "piers": {
+     "component": "pier",
+     "at": "bay_edges"
+    }
+   },
+   "upper": {
+    "openings": [
+     {
+      "component": "window",
+      "bays": "all",
+      "v": 1,
+      "align": "center",
+      "below": "sill"
+     }
+    ]
+   },
+   "bands": [
+    {
+     "component": "band",
+     "at": "floor_lines"
+    }
+   ],
+   "corners": {
+    "component": "corner"
+   },
+   "parapet": {
+    "component": "parapet"
+   }
+  },
+  "shared": {
+   "wall_only": true
+  },
+  "unknown": {
+   "skip": true
+  }
+ },
+ "limits": {
+  "note": "styles cannot raise limits (architecture 5)"
+ },
+ "notes": "Tan stucco retail strip: glass storefront bays with a centre double door, a 2-deep canopy over the ground floor, punched inset windows above, flat parapet with coping. Floor lines one consistent band (Detail pp.2-3); pattern fitted by gaps first (Detail p.19); never stretches the shell."
+}

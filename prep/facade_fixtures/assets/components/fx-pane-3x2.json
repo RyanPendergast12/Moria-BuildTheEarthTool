@@ -1,0 +1,87 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-pane-3x2",
+ "version": "1.0.0",
+ "title": "fx-pane-3x2",
+ "size": {
+  "u": 3,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass_pane"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)"
+}

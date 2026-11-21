@@ -1,0 +1,427 @@
+{
+ "schema": "facade-sources-1 (A draft; package.json sources[] is derived from this in phase 2)",
+ "package": "red-rock-casino",
+ "generated": "2026-10-29",
+ "local_root": "C:\\BTE-Migration\\facade\\refs",
+ "street_level_status": {
+  "mapillary": "no token (MAPILLARY_TOKEN / MAPILLARY_ACCESS_TOKEN unset; C:\\BTE-Migration\\facade\\secrets absent)",
+  "google_street_view": "not used: the Harlo method (scripts/sv_refs.py) uses an unkeyed internal thumbnail endpoint, not a configured API key, so the task condition is not met"
+ },
+ "sources": [
+  {
+   "id": "rr-c2024-3184",
+   "kind": "site-photo",
+   "date": "2024-12-29 15:59:51",
+   "era": "current (2024)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Casino_Resort_%26_Spa_in_Summerlin_South,_Nevada_(2024)_--_3184.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Casino_Resort_Spa_in_Summerlin_South_Nevada_2024_3184.jpg",
+   "sha256": "85e6a6836728937ce14d41e0841f0446d4bfa912f94a732d037fd182c14dca4a",
+   "license": "CC0",
+   "attribution": "Roc0ast3r / Own work",
+   "position": [
+    36.154522,
+    -115.333808
+   ],
+   "heading": "~NE, steep upward (estimated from content; not in metadata)",
+   "coverage": [
+    "tower:W (pool side, concave) south half",
+    "podium:S retaining/screen walls"
+   ],
+   "occlusion": "medium (palms/pines on lower floors)",
+   "shows": "W face as continuous horizontal floor lines over dark blue-black glass (in shade); thin cream cornice slab over recessed bronze top level; cream stucco garden walls and fencing at grade; podium terrace with glass rail"
+  },
+  {
+   "id": "rr-c2024-3185",
+   "kind": "site-photo",
+   "date": "2024-12-29 15:59:53",
+   "era": "current (2024)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Casino_Resort_%26_Spa_in_Summerlin_South,_Nevada_(2024)_--_3185.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Casino_Resort_Spa_in_Summerlin_South_Nevada_2024_3185.jpg",
+   "sha256": "a177f457bd1d34e5504de434872e3f00184d757a8dae0fb755d4bdd742dd979f",
+   "license": "CC0",
+   "attribution": "Roc0ast3r / Own work",
+   "position": [
+    36.154492,
+    -115.333808
+   ],
+   "heading": "~N/NE, steep upward (estimated)",
+   "coverage": [
+    "tower:S end pier",
+    "tower:W face south corner"
+   ],
+   "occlusion": "low (tree at lower left)",
+   "shows": "S end shaft clad in tan ledgestone (random-length horizontal strips, 2 tones); a vertical strip of bronze glazing with stepped per-floor bay frames on the S end; cream stucco frame wrapping the glass face; cantilevered flat roof slab ~2-3 m overhang (estimate); red letters high on the S end (unreadable)"
+  },
+  {
+   "id": "rr-c2010-hotel",
+   "kind": "site-photo",
+   "date": "2010-07-21",
+   "era": "2010 (post Phase II)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_hotel.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_hotel.jpg",
+   "sha256": "4b90e735413acf15f2562378d48a138c46de240d5b108bc606029c4a7b3bd5a7",
+   "license": "CC BY-SA 2.0",
+   "attribution": "nexxtpress.de / https://www.flickr.com/photos/nexxtpress/35095212494/",
+   "position": null,
+   "heading": "~W (looking at the E face; estimated from sign pier on right = north)",
+   "coverage": [
+    "tower:E (convex) face",
+    "tower:N end pier (E side)",
+    "podium:E corner"
+   ],
+   "occlusion": "low (palms at base)",
+   "shows": "E face glass with projecting light fins at every floor (~16 fin bands counted); two narrow ledgestone piers splitting the glass ~1/3 from the S end; recessed top level with stepped curved roof canopies and rooftop palms; N end ledgestone pier with \"red rock / CASINO\" sign; podium base red sandstone stacked stone + cream box"
+  },
+  {
+   "id": "rr-c2010-night",
+   "kind": "site-photo",
+   "date": "2010-07-24",
+   "era": "2010 (post Phase II)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_hotel_tower_at_night.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_hotel_tower_at_night.jpg",
+   "sha256": "d74af100fed30602eb141c1629f7fb5d2b68ceaf84a6d1ed661df67c99cbdb10",
+   "license": "CC BY-SA 2.0",
+   "attribution": "nexxtpress.de / https://www.flickr.com/photos/nexxtpress/35934980455/",
+   "position": null,
+   "heading": "~W (same viewpoint family as rr-c2010-hotel)",
+   "coverage": [
+    "tower:E face"
+   ],
+   "occlusion": "low",
+   "shows": "Night: fins lit, one per floor (~16 bands + top level); sign letters lit white"
+  },
+  {
+   "id": "rr-c2018-towerW",
+   "kind": "site-photo",
+   "date": "2018-04-09",
+   "era": "2018",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_hotel_tower_(2018).jpg",
+   "local": "red-rock-casino/commons_Red_Rock_hotel_tower_2018.jpg",
+   "sha256": "20293d336d0962ea69157fc542ed8e8c670fa4b7d5ebc17e8c5c4f75e334d5d9",
+   "license": "CC BY 2.0",
+   "attribution": "Jeff Hitchcock / https://www.flickr.com/photos/arbron/42522636020/",
+   "position": [
+    36.15583333,
+    -115.33527833
+   ],
+   "heading": "~E (description: \"Looking east\"); taken from the podium roof",
+   "coverage": [
+    "tower:W (pool side) face full width",
+    "tower:N pier",
+    "tower:S pier",
+    "podium:roof (w316302064)"
+   ],
+   "occlusion": "low (podium parapet hides tower base)",
+   "shows": "W face as one glass field in a cream stucco frame (~1 floor deep top band), flush horizontal lines per floor (no projecting fins seen), bronze/rose reflective glass; recessed top floor with small punched windows; N ledgestone pier with \"red rock CASINO\" (purple/maroon) sign; podium roof white membrane, AHU box, dishes, ~1.5-2 m cream parapet screen (estimate)"
+  },
+  {
+   "id": "rr-c2006-towerW",
+   "kind": "site-photo",
+   "date": "2006-11-02",
+   "era": "2006 (opening year)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_hotel_tower_(2006).jpg",
+   "local": "red-rock-casino/commons_Red_Rock_hotel_tower_2006.jpg",
+   "sha256": "d505155fbcc72b427afe311ff8385d03541d5541c79ac8eb7142881742f8c318",
+   "license": "CC BY 2.0",
+   "attribution": "Austin Marshall / https://www.flickr.com/photos/oxtopus/292014903/",
+   "position": null,
+   "heading": "~E/NE from pool terrace (estimated)",
+   "coverage": [
+    "tower:W face full width",
+    "podium:pool courtyard (partial)"
+   ],
+   "occlusion": "medium (palms on podium levels)",
+   "shows": "Same W-face composition as 2018; bronze reflective glass; podium plinth band under the glass"
+  },
+  {
+   "id": "rr-c2006-wide",
+   "kind": "site-photo",
+   "date": "2006-11-02",
+   "era": "2006 (before bowling/2014 works)",
+   "url": "https://commons.wikimedia.org/wiki/File:Wide_shot_of_Red_Rock_resort_(2006).jpg",
+   "local": "red-rock-casino/commons_Wide_shot_of_Red_Rock_resort_2006.jpg",
+   "sha256": "0b6237b27719ee150446e322f17ef1ac7aa040d66f40bfb6f76575de8566bcd8",
+   "license": "CC BY 2.0",
+   "attribution": "Austin Marshall / https://www.flickr.com/photos/oxtopus/287846486/",
+   "position": null,
+   "heading": "~W/NW from an upper tower floor (estimated from the Spring Mountains in view)",
+   "coverage": [
+    "podium:roofscape",
+    "podium:S and W walls (oblique)",
+    "podium:pool courtyard",
+    "rotunda drum"
+   ],
+   "occlusion": "low",
+   "shows": "Podium: cream stucco walls with red-stone accent panels, flat roofs with parapets and HVAC, round drum with wood soffit near pool, terraces on the courtyard side"
+  },
+  {
+   "id": "rr-c2018-nwentry",
+   "kind": "site-photo",
+   "date": "2018-04-09",
+   "era": "2018 (after 2014 Charleston-side works)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_casino_northwest_entrance.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_casino_northwest_entrance.jpg",
+   "sha256": "e1a0bb9c39519fe45c8ea3dc26603cc4261cd7ec9034e87d9565f753f12a8fa0",
+   "license": "CC BY 2.0",
+   "attribution": "Jeff Hitchcock / https://www.flickr.com/photos/arbron/44330500151/",
+   "position": [
+    36.15722167,
+    -115.335
+   ],
+   "heading": "~S/SE (estimated)",
+   "coverage": [
+    "restaurant row/casino NW entrance (w316302063/w316302064 NW corner)"
+   ],
+   "occlusion": "low",
+   "shows": "Yard House pylon (gray stacked stone); cream ledgestone band with swept cornice; red sandstone piers framing glass doors; white box canopy carrying silver \"CASINO\" letters (~1-1.2 m, estimate vs ~2.4-3 m doors); upper glazing under flat roof with wood soffit; lower restaurant bays with light stone piers and dark awnings"
+  },
+  {
+   "id": "rr-c2013-entry",
+   "kind": "site-photo",
+   "date": "2013-11-16",
+   "era": "2013 (before 2014 works)",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_casino_entrance.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_casino_entrance.jpg",
+   "sha256": "c4f69cce38d3e205070824c8bb4eeab512b535219d3dbce70a537208183bcfbc",
+   "license": "CC BY 2.0",
+   "attribution": "kennejima / https://www.flickr.com/photos/kennejima/11301501545/",
+   "position": null,
+   "heading": "unknown",
+   "coverage": [
+    "a casino entrance (position unresolved)"
+   ],
+   "occlusion": "medium (fountain, palms)",
+   "shows": "Same entrance vocabulary as the NW entrance: red sandstone piers, white box canopy with \"CASINO\", wood-soffit roof slab; red-rock monolith fountain sign \"red rock RESORT SPA\""
+  },
+  {
+   "id": "rr-c2013-pool",
+   "kind": "site-photo",
+   "date": "2013-11-16",
+   "era": "2013",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_hotel_pool_area_(2013).jpg",
+   "local": "red-rock-casino/commons_Red_Rock_hotel_pool_area_2013.jpg",
+   "sha256": "fda1955f7899a96bc02ec3bbe05b1f10656ef443529c80bba5d786d632d1465c",
+   "license": "CC BY 2.0",
+   "attribution": "kennejima / https://www.flickr.com/photos/kennejima/11301541456/",
+   "position": null,
+   "heading": "~N/NW across the pool (estimated)",
+   "coverage": [
+    "podium:pool courtyard face"
+   ],
+   "occlusion": "medium (palms, cabanas)",
+   "shows": "Courtyard face: 3 cream stucco bands with recessed terraces, red sandstone pilasters/chimneys, curved wood-soffit canopy at left"
+  },
+  {
+   "id": "rr-c2013-pool2",
+   "kind": "site-photo",
+   "date": "2013-11-16",
+   "era": "2013",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Resort_pool.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Resort_pool.jpg",
+   "sha256": "a12420249151218e7600a32fb47c5d852b252f44481e15f51533a7e84d93bf5c",
+   "license": "CC BY 2.0",
+   "attribution": "kennejima / https://www.flickr.com/photos/kennejima/11301538796",
+   "position": null,
+   "heading": "~NE (estimated)",
+   "coverage": [
+    "tower:W face lower floors",
+    "pool courtyard"
+   ],
+   "occlusion": "medium",
+   "shows": "Tower W face lower floors behind palms; context only"
+  },
+  {
+   "id": "rr-c2009-pool",
+   "kind": "site-photo",
+   "date": "2009-07",
+   "era": "2009",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Hotel_pool.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Hotel_pool.jpg",
+   "sha256": "784e09465eda6a2d58be7260ea91142d3accef4329b4d678964a61255bb69888",
+   "license": "CC BY 3.0",
+   "attribution": "Blane / Own work",
+   "position": null,
+   "heading": "unknown",
+   "coverage": [
+    "pool courtyard (night)"
+   ],
+   "occlusion": "high",
+   "shows": "Night pool party; drum and planting; context only, not used for layout"
+  },
+  {
+   "id": "rr-c2005-constr",
+   "kind": "site-photo",
+   "date": "15 July 2005 (original upload date)",
+   "era": "2005 construction - DO NOT use for facade",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Casino_Construction.JPG",
+   "local": "red-rock-casino/commons_Red_Rock_Casino_Construction.jpg",
+   "sha256": "d1e4abf9f693856a79b0c33e71f9c977475d7c7c706b27cb76fd2c7b5f1c5ab4",
+   "license": "CC BY-SA 3.0",
+   "attribution": "Vegaswikian at English Wikipedia / Transferred from en.wikipedia to Commons by Explicit using CommonsHelper.",
+   "position": null,
+   "heading": "~W (Spring Mountains behind)",
+   "coverage": [
+    "tower massing (unfinished)"
+   ],
+   "occlusion": "distant",
+   "shows": "Construction; massing context only"
+  },
+  {
+   "id": "rr-c2007-turtlehead",
+   "kind": "site-photo",
+   "date": "2007-02-18",
+   "era": "2007",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Casino_from_Turtlehead_1.jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Casino_from_Turtlehead_1.jpg",
+   "sha256": "59fdc87267f9950b8dc200e8214881f3c3a7245b131d5bb0e65dd7cf05adc998",
+   "license": "CC BY-SA 3.0",
+   "attribution": "Stan Shebs / Own work",
+   "position": null,
+   "heading": "~E from Turtlehead Peak (very distant)",
+   "coverage": [
+    "massing only"
+   ],
+   "occlusion": "distance",
+   "shows": "Massing context only; Commons coordinates absent"
+  },
+  {
+   "id": "rr-c2015-air1",
+   "kind": "site-photo",
+   "date": "2015-05-25 09:39",
+   "era": "2015",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Resort_and_Spa,_Summerlin,_Nevada_(17575600594).jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Resort_and_Spa_Summerlin_Nevada_17575600594.jpg",
+   "sha256": "88659afb4e92b91d65699c82cc53970e813684c1fded22aa3d3fbf26308a9284",
+   "license": "CC BY-SA 2.0",
+   "attribution": "Ken Lund from Reno, Nevada, USA / Red Rock Resort and Spa, Summerlin, Nevada",
+   "position": [
+    36.036544,
+    -115.392412
+   ],
+   "heading": "aerial oblique from aircraft",
+   "coverage": [
+    "massing only"
+   ],
+   "occlusion": "distance",
+   "shows": "Aerial context; Commons coordinates (36.0365,-115.3924) are ~14 km away and wrong for the subject"
+  },
+  {
+   "id": "rr-c2015-air2",
+   "kind": "site-photo",
+   "date": "2015-05-25 09:38",
+   "era": "2015",
+   "url": "https://commons.wikimedia.org/wiki/File:Red_Rock_Resort_and_Spa,_Summerlin,_Nevada_(18010361558).jpg",
+   "local": "red-rock-casino/commons_Red_Rock_Resort_and_Spa_Summerlin_Nevada_18010361558.jpg",
+   "sha256": "2ba96708c6ab0f79716ef48d2d1e44104c9f32410828ab5fb755d7a832f13aee",
+   "license": "CC BY-SA 2.0",
+   "attribution": "Ken Lund from Reno, Nevada, USA / Red Rock Resort and Spa, Summerlin, Nevada",
+   "position": [
+    36.036544,
+    -115.392412
+   ],
+   "heading": "aerial oblique from aircraft",
+   "coverage": [
+    "massing only"
+   ],
+   "occlusion": "distance",
+   "shows": "Aerial context; tower slab, podium and parking decks; coordinates wrong as above"
+  },
+  {
+   "id": "rr-ortho-esri-z18",
+   "kind": "ortho",
+   "date": "unresolved",
+   "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+   "local": "red-rock-casino/ortho_esri_z18.png",
+   "sha256": "41baa2e8f0e7607111568873c6a996001737274eb5571a2898046bf45b25eca5",
+   "license": "Esri World Imagery terms of use: private reference only, not redistributed",
+   "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+   "position": null,
+   "heading": "top-down",
+   "coverage": [
+    "all roofs/footprints in bbox [36.153, -115.3365, 36.1575, -115.33]"
+   ],
+   "occlusion": "none",
+   "shows": "plain mosaic"
+  },
+  {
+   "id": "rr-ortho-esri-z18-osm",
+   "kind": "ortho",
+   "date": "unresolved",
+   "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+   "local": "red-rock-casino/ortho_esri_z18_osm.png",
+   "sha256": "59240538c3b06be37c97599a777e6e4b994940cea582f022f339ad2b427121ed",
+   "license": "Esri World Imagery terms of use: private reference only, not redistributed",
+   "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+   "position": null,
+   "heading": "top-down",
+   "coverage": [
+    "all roofs/footprints in bbox [36.153, -115.3365, 36.1575, -115.33]"
+   ],
+   "occlusion": "none",
+   "shows": "mosaic with OSM building ways drawn in red, ids in yellow"
+  },
+  {
+   "id": "rr-osm",
+   "kind": "osm",
+   "date": "2026-10-25 (Overpass fetch)",
+   "url": "https://overpass-api.de/api/interpreter",
+   "local": "C:\\BTE-Migration\\summerlin\\data\\osm_candidate_area.json",
+   "sha256": "43f0274f53313d2c5e603393518a1c351436dcbecbe25b5c7b4a44ec5633e9cd",
+   "license": "ODbL 1.0",
+   "attribution": "(c) OpenStreetMap contributors",
+   "coverage": [
+    "footprints w316302064 w316302058 w316302063 w316302065 w316302059 w316302060 w316302055 w744324634 w744324884"
+   ],
+   "shows": "building tags only; no building:part, height, levels or roof:* tags on any resort way; landuse w316302054 is NOT in the local index"
+  },
+  {
+   "id": "rr-lidar-pilot",
+   "kind": "lidar",
+   "date": "2022 (USGS 3DEP, per pilot report)",
+   "local": "C:\\BTE-Migration\\summerlin\\pilot\\buildings_measured.json",
+   "sha256": "5ee3a70583f3fcc18d3fd2884a885d51b556bc5e5001507183e9bb9f81f4d06f",
+   "license": "public domain (USGS)",
+   "attribution": "USGS 3DEP",
+   "coverage": [
+    "w316302058 roof p50 64.18 m (bands 64/66 m)",
+    "w316302055 roof p50 15.04 m"
+   ],
+   "shows": "measured heights for the two resort ways that touch the pilot bbox; others not measured yet (agent B)"
+  },
+  {
+   "id": "rr-wikipedia",
+   "kind": "doc",
+   "date": "retrieved 2026-10-29",
+   "url": "https://en.wikipedia.org/wiki/Red_Rock_Casino,_Resort_%26_Spa",
+   "license": "CC BY-SA 4.0 (text)",
+   "attribution": "Wikipedia contributors",
+   "coverage": [
+    "history"
+   ],
+   "shows": "opened 2006-04-18; 415 rooms at opening, expansion Jan 2007; tower approved at 198 ft (60 m) in Jan 2004; $35M 2014 works (restaurant row on Charleston, drop-off toward Downtown Summerlin); 2019-20 room remodel; 2022 restaurant/pool changes"
+  },
+  {
+   "id": "rr-tutorperini",
+   "kind": "doc",
+   "date": "retrieved 2026-10-29",
+   "url": "https://www.tutorperini.com/projects/hospitality-gaming/red-rock-resort-spa/",
+   "license": "all rights reserved (facts only)",
+   "attribution": "Tutor Perini",
+   "coverage": [
+    "history",
+    "tower"
+   ],
+   "shows": "Phase I: 17-story tower, 415 rooms, spa; low-rise 720,000 sq ft incl. casino, back of house, central plant. Phase II: 20-story tower, 427 rooms, spa expansion, 4 penthouses. Architect Friedmutter Group"
+  },
+  {
+   "id": "rr-official",
+   "kind": "doc",
+   "date": "retrieved 2026-10-29",
+   "url": "https://www.redrockresort.com/",
+   "license": "all rights reserved (reference only, nothing downloaded)",
+   "attribution": "Station Casinos",
+   "coverage": [],
+   "shows": "official name \"Red Rock Casino Resort Spa\", 11011 W Charleston Blvd; no floor count or gallery; press at https://www.stationcasinos.com/newsroom/"
+  }
+ ]
+}

@@ -1,0 +1,111 @@
+{
+ "schema": "facade-package-1",
+ "generator_min": "0.6.0",
+ "package": {
+  "id": "fx-party",
+  "version": "1.0.0",
+  "kind": "reference",
+  "title": "fx-party",
+  "license": "fixture",
+  "attribution": "synthetic"
+ },
+ "building": {
+  "osm": [
+   "w9000006"
+  ],
+  "parts": [
+   "p0"
+  ],
+  "shell": "none"
+ },
+ "crs": {
+  "projection": "bte-tpm-geo.py",
+  "units": "block=1m",
+  "y": "world"
+ },
+ "sources": [
+  {
+   "id": "s1",
+   "kind": "street",
+   "date": "2024-08",
+   "license": "fixture",
+   "attribution": "synthetic",
+   "coverage": [
+    "p0:f0",
+    "p0:f1",
+    "p0:f2"
+   ]
+  }
+ ],
+ "elevations": {
+  "measured": {},
+  "accepted": {}
+ },
+ "palette": "lib:fx-tan",
+ "components": {
+  "win": {
+   "ref": "lib:fx-window-2x3"
+  },
+  "door": {
+   "ref": "lib:fx-door"
+  },
+  "pane": {
+   "ref": "lib:fx-pane-3x2"
+  },
+  "canopy": {
+   "ref": "lib:fx-canopy-d2"
+  },
+  "sign": {
+   "ref": "lib:fx-sign"
+  },
+  "band": {
+   "ref": "lib:fx-band"
+  }
+ },
+ "faces": [
+  {
+   "face": "*",
+   "floors": {
+    "base_v": 0,
+    "height": 4,
+    "count": "auto"
+   },
+   "bays": {
+    "width": 6,
+    "residual": "center"
+   },
+   "openings": [
+    {
+     "component": "win",
+     "bays": "every 2"
+    }
+   ],
+   "corners": {
+    "role": "column"
+   },
+   "roof_edge": {
+    "role": "roof-edge"
+   },
+   "evidence": {
+    "class": "inferred",
+    "sources": [
+     "s1"
+    ],
+    "confidence": 0.8,
+    "coverage": 1.0
+   }
+  }
+ ],
+ "unresolved": [],
+ "envelope": {
+  "outward": 1,
+  "inward_backing": 1,
+  "protrusions": []
+ },
+ "limits": {
+  "max_ops": 20000,
+  "max_extent_m": 200,
+  "exception": null
+ },
+ "seed": 7
+}

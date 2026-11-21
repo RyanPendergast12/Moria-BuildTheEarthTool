@@ -1,0 +1,34 @@
+{
+ "schema": "facade-component-1",
+ "id": "parapet-cap",
+ "version": "1.0.0",
+ "title": "Parapet with cap",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "parapet"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "roof-edge",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Flat-roof parapet: one parapet block topped by a bottom-slab coping (architecture 8: flat parapet by default; Summerlin default: the roof-edge line may become coping, BUILDING-STANDARDS 8; slab line, Detail pp.20-21). Never raises the measured top: the compiler places it inside the accepted height. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

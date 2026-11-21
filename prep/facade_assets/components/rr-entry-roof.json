@@ -1,0 +1,35 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-entry-roof",
+ "version": "1.0.0",
+ "title": "Red Rock entrance roof slab (wood soffit)",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "trim",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 2,
+   "role": "trim",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Cantilevered flat roof over the entrance upper glazing, wood-tone soffit (rr-c2018-nwentry). (Detail pp.20-21). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

@@ -1,0 +1,30 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-parapet",
+ "version": "1.0.0",
+ "title": "fx-parapet",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "parapet"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "roof-edge",
+   "props": {
+    "type": "bottom"
+   }
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)"
+}

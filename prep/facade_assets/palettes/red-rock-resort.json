@@ -1,0 +1,62 @@
+{
+ "schema": "facade-palette-1",
+ "id": "red-rock-resort",
+ "version": "2.0.0",
+ "title": "Red Rock Casino Resort Spa (agent A, photo-sampled estimates)",
+ "status": "reference-estimate",
+ "roles": {
+  "wall": "minecraft:white_terracotta",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:brown_stained_glass",
+  "frame": "minecraft:smooth_sandstone",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_sandstone_slab",
+  "band": "minecraft:smooth_sandstone",
+  "parapet": "minecraft:smooth_sandstone",
+  "canopy": "minecraft:smooth_quartz_slab",
+  "column": "minecraft:brown_terracotta",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:white_concrete",
+  "roof-edge": "minecraft:smooth_sandstone_slab",
+  "sign": "minecraft:purple_terracotta",
+  "trim": "minecraft:smooth_stone_slab"
+ },
+ "zones": {
+  "tower-glass": {
+   "wall": "minecraft:smooth_sandstone",
+   "band": "minecraft:smooth_sandstone",
+   "frame": "minecraft:smooth_sandstone"
+  },
+  "ledgestone": {
+   "wall": "minecraft:sandstone",
+   "band": "minecraft:cut_sandstone",
+   "glass": "minecraft:brown_stained_glass",
+   "frame": "minecraft:smooth_sandstone"
+  },
+  "podium": {
+   "wall": "minecraft:white_terracotta",
+   "band": "minecraft:smooth_sandstone",
+   "column": "minecraft:brown_terracotta"
+  },
+  "entrance": {
+   "wall": "minecraft:white_terracotta",
+   "column": "minecraft:brown_terracotta",
+   "canopy": "minecraft:smooth_quartz_slab",
+   "band": "minecraft:smooth_quartz",
+   "trim": "minecraft:dark_oak_slab",
+   "sign": "minecraft:light_gray_concrete"
+  }
+ },
+ "notes": "Phase 2 (agent A, 2026-10-29). Colour before texture (Detail p.30): each role takes a 1.18.2 block near (OkLAB, facade_palette_tools nearest) a colour sampled from a dated Wikimedia Commons photo. Samples depend on lighting, so they are ESTIMATES; colour_refs lists each with its source id (packages/red-rock-casino/sources.json). Glass: the tower glass reads blue-black in shade and bronze/rose when reflecting. Gray stained glass (nearest the reflective sample) is framed by bronze (brown stained glass) mullions and floor lines, so the bronze reads as framing (Detail pp.4-5: an odd glass colour only with other detail). Backing is gray concrete (not black behind gray glass). Zone tower-glass = the cream stucco frame and cornice around the tower glass. Zone ledgestone = the tan stacked-strip stone of the tower end piers; the rr components make it 2-tone by rows (Detail p.24). Zone podium = cream stucco with red sandstone piers. Zone entrance = the post-2014 NW casino entrance (white box canopy, red sandstone piers, wood soffit, silver letters). Sign = maroon/purple letters as seen 2010-2018 (the 2024 S-end letters read red: era noted in EVIDENCE.md). Unobserved roles (door, sill) are library defaults.",
+ "colour_refs": [
+  {"role": "wall", "target_srgb": "#d0b99d", "source": "rr-c2013-pool (courtyard stucco, noon) -> white_terracotta dE 6.8"},
+  {"role": "wall", "zone": "ledgestone", "target_srgb": "#c9b48e", "source": "ESTIMATE between rr-c2024-3185 (#d2aa62, golden hour, warm-biased) and rr-c2010-hotel; -> sandstone dE 9.4"},
+  {"role": "glass", "target_srgb": "#4d4a63", "source": "rr-c2018-towerw (W face reflecting the mountains) -> gray_stained_glass dE 15.9; the shade sample #222936 (rr-c2024-3184) is nearer black glass"},
+  {"role": "column", "zone": "podium", "target_srgb": "#633e3a", "source": "rr-c2018-nwentry (red sandstone, sunlit upper pier) -> brown_terracotta dE 10.2"},
+  {"role": "trim", "zone": "entrance", "target_srgb": "#4d2d20", "source": "rr-c2018-nwentry (wood soffit) -> dark_oak family dE 7.1"},
+  {"role": "roof", "target_srgb": "#d1d2d2", "source": "rr-c2018-towerw (podium roof membrane) -> white_concrete dE 2.0"},
+  {"role": "trim", "target_srgb": "#6c6a6f", "source": "rr-c2010-hotel (E-face fins, shade side) -> stone family; smooth_stone_slab for the thin fin"}
+ ],
+ "license": "original (Moria)",
+ "attribution": "Moria; colours sampled from Wikimedia Commons photos listed in packages/red-rock-casino/sources.json"
+}

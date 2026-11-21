@@ -1,0 +1,40 @@
+{
+ "schema": "facade-component-1",
+ "id": "column-2x2",
+ "version": "1.0.0",
+ "title": "Column 2x2",
+ "size": {
+  "u": 2,
+  "v": 1
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 2,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 1,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 2,
+   "role": "column"
+  }
+ ],
+ "notes": "Solid 2x2 column standing 1-2 blocks out from the wall (Detail pp.28-29). Pair with column-2x2-base at its foot, which widens the base (Detail p.28). repeat_v.",
+ "license": "original (Moria)"
+}

@@ -1,0 +1,43 @@
+{
+ "schema": "facade-palette-1",
+ "id": "office-lowrise-gray",
+ "version": "1.0.0",
+ "title": "Low-rise office, gray precast",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:polished_andesite",
+  "glass": "minecraft:cyan_stained_glass",
+  "mullion": "minecraft:light_gray_stained_glass",
+  "frame": "minecraft:iron_trapdoor",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_stone_slab",
+  "band": "minecraft:smooth_stone",
+  "parapet": "minecraft:smooth_stone",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:polished_andesite",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:light_gray_concrete",
+  "roof-edge": "minecraft:smooth_stone_slab",
+  "sign": "minecraft:gray_concrete",
+  "trim": "minecraft:smooth_stone"
+ },
+ "texture": {
+  "column": {
+   "alt": "minecraft:andesite",
+   "rule": "rows%2==1"
+  }
+ },
+ "notes": "Gray precast/EIFS body, lighter smooth-stone floor bands and coping, blue-gray reflective glazing (cyan glass, Detail pp.4-5) with light-gray glass mullions (alternating glass, Detail p.3). Column texture alternates andesite courses (Detail p.24).",
+ "colour_refs": [
+  {
+   "role": "wall",
+   "target_srgb": "#868888",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  },
+  {
+   "role": "glass",
+   "target_srgb": "#4d7a90",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  }
+ ]
+}

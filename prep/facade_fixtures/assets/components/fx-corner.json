@@ -1,0 +1,28 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-corner",
+ "version": "1.0.0",
+ "title": "fx-corner",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "trim"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "wall"
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)",
+ "repeat_v": true
+}

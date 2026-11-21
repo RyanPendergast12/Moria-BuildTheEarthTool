@@ -9,7 +9,13 @@
 - [x] Shared protected writer, ledger, locks and undo with Snowball. Retirement covers every chunk of the tile.
 - [x] Portability carried in v0.5 only where Egg needs it: data paths can be overridden by `MORIA_*` environment variables (`prep/egg_common.py`) and `egg-*` config keys.
 
-## v0.6 – portable (no source edits needed)
+## v0.6 – Facade: detailed exteriors and landmark design packages (in development)
+- [ ] `/facadetool`: inspect a building, select a reference package or an explicitly chosen style, preview, apply per chunk or bounded whole-building, undo. See `docs/facade/ARCHITECTURE.md`.
+- [ ] Versioned design packages (schema `facade-package-1`), compiled deterministically into block plans; no AI at runtime.
+- [ ] Reusable palettes, components and styles for Summerlin buildings; Red Rock Casino as the first landmark package; Harlo as the reference-matched regression.
+- [ ] Ownership-based replacement of shell blocks, verified adoption of pre-ledger work, retirement and undo shared with Snowball and Egg.
+
+## v0.7 – portable (no source edits needed)
 - [ ] One config for everything: move every hard-coded path into `config.yml`, and have the plugin pass them to the prep worker. These are:
   - the OSM index;
   - the protected-zone polygons;
@@ -24,7 +30,7 @@
 - [ ] `requirements.txt` and a one-click `setup.bat` / `setup.sh`.
 - [ ] Use the permissions plugin when one is present (LuckPerms nodes), alongside `allowed-players`.
 
-## v0.7 – easy install
+## v0.8 – easy install
 - [ ] Remove the Python dependency: port preparation to Java inside the plugin. This is the biggest barrier for other server owners.
   - Shapely becomes JTS. pyproj and TerraPlusMinus are already Java.
   - LAZ decoding needs a Java reader.

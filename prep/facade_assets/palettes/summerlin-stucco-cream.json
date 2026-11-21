@@ -1,0 +1,37 @@
+{
+ "schema": "facade-palette-1",
+ "id": "summerlin-stucco-cream",
+ "version": "1.0.0",
+ "title": "Summerlin cream stucco retail",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:smooth_quartz",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:black_stained_glass",
+  "frame": "minecraft:dark_oak_trapdoor",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_sandstone_slab",
+  "band": "minecraft:smooth_sandstone",
+  "parapet": "minecraft:smooth_quartz",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:smooth_sandstone",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:white_concrete",
+  "roof-edge": "minecraft:smooth_sandstone_slab",
+  "sign": "minecraft:brown_terracotta",
+  "trim": "minecraft:smooth_sandstone"
+ },
+ "notes": "Cream/off-white stucco body with tan accent bands and coping; dark bronze storefront as in the tan palette (Detail pp.3-5). No texture alternation on the flat stucco (Detail p.3: never mix randomly).",
+ "colour_refs": [
+  {
+   "role": "wall",
+   "target_srgb": "#e8e0d2",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  },
+  {
+   "role": "trim",
+   "target_srgb": "#d8c9a0",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  }
+ ]
+}

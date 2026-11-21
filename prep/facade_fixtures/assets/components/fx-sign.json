@@ -1,0 +1,44 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-sign",
+ "version": "1.0.0",
+ "title": "fx-sign",
+ "size": {
+  "u": 3,
+  "v": 5
+ },
+ "repeat_u": false,
+ "cells": [],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)",
+ "glyph_size": {
+  "u": 3,
+  "v": 5
+ },
+ "spacing": 1,
+ "role": "sign",
+ "w": 0,
+ "glyphs": {
+  "F": [
+   "111",
+   "100",
+   "110",
+   "100",
+   "100"
+  ],
+  "X": [
+   "101",
+   "101",
+   "010",
+   "101",
+   "101"
+  ],
+  " ": [
+   "000",
+   "000",
+   "000",
+   "000",
+   "000"
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-ribbon",
+ "version": "1.0.0",
+ "title": "Ribbon window, repeating",
+ "size": {
+  "u": 2,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "Continuous band of glazing with a mullion every 2nd block (Detail pp.3-4), backing 1 block behind (Detail pp.4-5). repeat_u: the compiler tiles it along the opening and fits the residual by adjusting gaps first (Detail p.19).",
+ "license": "original (Moria)"
+}

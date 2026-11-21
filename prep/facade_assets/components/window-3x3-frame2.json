@@ -1,0 +1,198 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-3x3-frame2",
+ "version": "1.0.0",
+ "title": "Window 3x3, inset, 2-way split frame",
+ "size": {
+  "u": 3,
+  "v": 3
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:end_rod[facing=up]"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "bottom",
+    "type": "bottom",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "bottom",
+    "type": "bottom",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "bottom",
+    "type": "bottom",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:air"
+  }
+ ],
+ "notes": "Inset window split horizontally in the middle with a frame trapdoor or slab, and vertically in the lower part with an end rod, which does not connect to walls (Detail pp.11-12). Even widths have no centre column, so only the horizontal split is used. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

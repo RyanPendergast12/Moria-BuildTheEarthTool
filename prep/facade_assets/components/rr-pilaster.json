@@ -1,0 +1,22 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-pilaster",
+ "version": "1.0.0",
+ "title": "Red Rock red sandstone pilaster",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  }
+ ],
+ "notes": "Red sandstone pilaster/chimney on the podium courtyard face (rr-c2013-pool). (Detail pp.28-29). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

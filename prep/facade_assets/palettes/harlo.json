@@ -1,0 +1,83 @@
+{
+ "schema": "facade-palette-1",
+ "id": "harlo",
+ "version": "1.0.0",
+ "title": "Harlo Steakhouse (accepted cycle-1 materials)",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:gray_concrete",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:black_stained_glass",
+  "frame": "minecraft:smooth_stone_slab",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_stone_slab",
+  "band": "minecraft:gray_concrete",
+  "parapet": "minecraft:gray_concrete",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:gray_concrete",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:white_concrete",
+  "roof-edge": "minecraft:gray_concrete",
+  "sign": "minecraft:gray_concrete",
+  "trim": "minecraft:smooth_stone_slab"
+ },
+ "zones": {
+  "main-w": {
+   "wall": "minecraft:stone_bricks",
+   "mullion": "minecraft:light_gray_stained_glass",
+   "band": "minecraft:gray_concrete",
+   "roof-edge": "minecraft:gray_concrete"
+  },
+  "cream": {
+   "wall": "minecraft:smooth_quartz",
+   "band": "minecraft:smooth_sandstone",
+   "parapet": "minecraft:light_gray_concrete",
+   "roof-edge": "minecraft:light_gray_concrete"
+  },
+  "service": {
+   "wall": "minecraft:light_gray_concrete"
+  }
+ },
+ "notes": "Reproduces the accepted Harlo cycle-1 palette (job.json palette, JOB.md section 7, BUILD-REPORT.md). Base roles = tall NW volume: charcoal panel (gray_concrete), gray storefront glass with black-glass mullions every 2nd column, gray backing, smooth-stone top-slab louvers (role trim) and canopy. Zones: main-w (CMU stone_bricks, light-gray glass mullions, panel band), cream (S/E cream panels, tan base course as band, light-gray coping), service (light-gray solid service doors: the job used a solid block, not a door block). frame, sill and door are not used by the accepted job and are library defaults only.",
+ "colour_refs": [
+  {
+   "role": "wall",
+   "target_srgb": "#3a3f45",
+   "source": "Harlo JOB.md 7: charcoal panels, NW frames"
+  },
+  {
+   "role": "band",
+   "zone": "cream",
+   "target_srgb": "#c5b8a5",
+   "source": "Harlo JOB.md 7: S base 197:184:165"
+  },
+  {
+   "role": "wall",
+   "zone": "cream",
+   "target_srgb": "#8c8270",
+   "source": "Harlo JOB.md 7: E cream in shade 140:130:112"
+  },
+  {
+   "role": "roof-edge",
+   "zone": "cream",
+   "target_srgb": "#5c5e5d",
+   "source": "Harlo JOB.md 7: coping in shade 92:94:93"
+  }
+ ],
+ "source_job": "C:\\BTE-Migration\\summerlin\\detailing\\jobs\\harlo-w348127357\\job.json",
+ "job_palette_map": {
+  "panel": "roles.wall / band / parapet / roof-edge / column",
+  "cmu": "zones.main-w.wall",
+  "glass_dark": "roles.glass",
+  "mullion_dark": "roles.mullion",
+  "mullion_light": "zones.main-w.mullion",
+  "backing": "roles.backing",
+  "louver": "roles.trim (component louver-panel)",
+  "canopy": "roles.canopy",
+  "roof": "roles.roof",
+  "cream": "zones.cream.wall",
+  "base_tan": "zones.cream.band",
+  "coping_light": "zones.cream.roof-edge",
+  "service_door": "zones.service.wall"
+ }
+}

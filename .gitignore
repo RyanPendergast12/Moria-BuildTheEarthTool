@@ -12,3 +12,6 @@ shells.txt
 world*/
 __pycache__/
 venv/
+
+# Street View-derived reference package (private reference only, not redistributable)
+packages/harlo-w348127357/

@@ -1,0 +1,63 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-2x2",
+ "version": "1.0.0",
+ "title": "Window 2x2, flush",
+ "size": {
+  "u": 2,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "Flush glazing in the wall plane with solid backing 1 block behind (Detail pp.4-5). Flush suits modern facades (Detail p.10).",
+ "license": "original (Moria)"
+}

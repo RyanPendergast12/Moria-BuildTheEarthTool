@@ -1,0 +1,114 @@
+{
+ "schema": "facade-style-1",
+ "id": "lowrise-office",
+ "version": "1.0.0",
+ "kind": "style",
+ "title": "Low-rise office (2-4 storey)",
+ "label": "STYLE-GENERATED (not observed)",
+ "license": "original (Moria)",
+ "evidence": {
+  "class": "style"
+ },
+ "applies_to": {
+  "building": [
+   "office",
+   "commercial",
+   "yes"
+  ],
+  "max_levels": 4,
+  "min_face_len": 8
+ },
+ "palette": "lib:office-lowrise-gray",
+ "components": {
+  "ribbon": {
+   "ref": "lib:window-ribbon"
+  },
+  "entry": {
+   "ref": "lib:storefront-bay"
+  },
+  "door": {
+   "ref": "lib:door-double"
+  },
+  "band": {
+   "ref": "lib:floor-band"
+  },
+  "canopy": {
+   "ref": "lib:canopy-flat-d3"
+  },
+  "parapet": {
+   "ref": "lib:parapet-cap"
+  },
+  "corner": {
+   "ref": "lib:corner-quoin"
+  }
+ },
+ "defaults": {
+  "exterior": {
+   "floors": {
+    "base_v": 0,
+    "height": 4,
+    "count": "auto"
+   },
+   "bays": {
+    "width": 8,
+    "residual": "center"
+   },
+   "ground": {
+    "openings": [
+     {
+      "component": "ribbon",
+      "bays": "all",
+      "v": 1,
+      "u_inset": 1
+     },
+     {
+      "component": "entry",
+      "bays": "center",
+      "replace": "ribbon"
+     },
+     {
+      "component": "door",
+      "bays": "center"
+     }
+    ],
+    "canopy": {
+     "component": "canopy",
+     "bays": "center",
+     "v": 4
+    }
+   },
+   "upper": {
+    "openings": [
+     {
+      "component": "ribbon",
+      "bays": "all",
+      "v": 1,
+      "u_inset": 1
+     }
+    ]
+   },
+   "bands": [
+    {
+     "component": "band",
+     "at": "floor_lines"
+    }
+   ],
+   "corners": {
+    "component": "corner"
+   },
+   "parapet": {
+    "component": "parapet"
+   }
+  },
+  "shared": {
+   "wall_only": true
+  },
+  "unknown": {
+   "skip": true
+  }
+ },
+ "limits": {
+  "note": "styles cannot raise limits (architecture 5)"
+ },
+ "notes": "Gray precast office: horizontal ribbon windows with mullions every 2 (Detail pp.3-4) between flush floor bands (Detail pp.2-3), a glazed entry bay with double door and deep canopy in the centre bay, quoined corners, flat parapet."
+}

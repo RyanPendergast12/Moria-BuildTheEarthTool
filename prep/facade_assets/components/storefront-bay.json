@@ -1,0 +1,111 @@
+{
+ "schema": "facade-component-1",
+ "id": "storefront-bay",
+ "version": "1.0.0",
+ "title": "Storefront bay with mullions and transom",
+ "size": {
+  "u": 2,
+  "v": 4
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "Ground-floor storefront: vision glass with a mullion every 2nd column (Detail pp.3-4) and a transom line made of one darker glass row (one consistent floor/transom element, Detail pp.2-3), backing 1 block behind (Detail pp.4-5). Needs a glass-type mullion in the palette. repeat_u along the bay.",
+ "license": "original (Moria)"
+}

@@ -1,0 +1,28 @@
+{
+ "schema": "facade-component-1",
+ "id": "corner-glass",
+ "version": "1.0.0",
+ "title": "Corner, glazed",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "Glass on the corner column for glazed corners, backing 1 block inside (Detail pp.4-5). The compiler moves the backing to the diagonal inner cell when -1 lands on another face's wall line. repeat_v.",
+ "license": "original (Moria)"
+}

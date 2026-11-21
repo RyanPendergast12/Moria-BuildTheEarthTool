@@ -1,0 +1,105 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-ledge",
+ "version": "1.0.0",
+ "title": "Red Rock ledgestone, 3-row floor",
+ "size": {
+  "u": 5,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 3,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  }
+ ],
+ "notes": "Tan stacked-strip ledgestone of the tower end piers, 2-tone deterministic pattern (Detail p.24); rr-c2024-3185, rr-c2010-hotel. Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

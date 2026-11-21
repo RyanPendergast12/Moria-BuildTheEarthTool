@@ -1,0 +1,37 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-roofslab",
+ "version": "1.0.0",
+ "title": "Red Rock cantilevered roof slab",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 1,
+   "w": 1,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 2,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 3,
+   "role": "sill",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Flat roof slab cantilevered about 2-3 m beyond the walls (estimate from rr-c2024-3185, rr-c2018-towerw); placed as a canopy over the top 2 rows (cells in the top row) so the package protrusion allowance governs its depth. (Detail pp.20-21). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

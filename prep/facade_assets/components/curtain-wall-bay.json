@@ -1,0 +1,111 @@
+{
+ "schema": "facade-component-1",
+ "id": "curtain-wall-bay",
+ "version": "1.0.0",
+ "title": "Curtain-wall bay, one floor, with floor line",
+ "size": {
+  "u": 2,
+  "v": 4
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "Glass-tower module: floor line first, as a darker glass row at the slab edge used the same way on every floor (Detail pp.2-3); mullions every 2 blocks (Detail pp.3-4); backing 1 block behind, never a deep core (Detail pp.4-5). Anchor = the floor-line row; repeat_u along the face, stacked per floor by the style.",
+ "license": "original (Moria)"
+}

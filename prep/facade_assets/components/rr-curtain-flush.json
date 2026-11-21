@@ -1,0 +1,51 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-curtain-flush",
+ "version": "1.0.0",
+ "title": "Red Rock tower continuous bronze curtain wall, 3-row floor, flush floor line",
+ "size": {
+  "u": 1,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "block": "minecraft:brown_concrete"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  }
+ ],
+ "notes": "One 3-block floor of the hotel tower as a CONTINUOUS bronze reflective curtain wall: bronze glass across the band, no visible mullion grid; the floor line is the same bronze glass over a brown concrete spandrel, a thin same-tone darker line (Detail pp.2-3: floor lines first; pp.4-5: odd glass colour only with other detail, here the ledgestone piers and cream frame; black backing colour chosen to stay in the bronze tone). W (concave) face: flush, no fins (rr-c2018-towerw, rr-c2006-towerw). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

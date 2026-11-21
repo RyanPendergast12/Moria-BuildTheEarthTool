@@ -1,0 +1,22 @@
+{
+ "schema": "facade-component-1",
+ "id": "corner-wrap",
+ "version": "1.0.0",
+ "title": "Corner, wrapped",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "wall"
+  }
+ ],
+ "notes": "The corner column continues the face material so bands and cladding wrap round (Harlo louvers and canopy wrap the NW corner). repeat_v; the compiler places bands/canopy on the corner by the faces' own rules. Texture rules stay per row (Detail p.24).",
+ "license": "original (Moria)"
+}

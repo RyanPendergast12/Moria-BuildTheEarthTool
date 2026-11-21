@@ -1,0 +1,60 @@
+{
+ "schema": "facade-component-1",
+ "id": "porte-cochere-edge",
+ "version": "1.0.0",
+ "title": "Porte-cochere canopy edge",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "canopy",
+   "props": {
+    "type": "top",
+    "half": "top",
+    "open": "false",
+    "facing": "{facing}",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 2,
+   "role": "canopy",
+   "props": {
+    "type": "top",
+    "half": "top",
+    "open": "false",
+    "facing": "{facing}",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 3,
+   "role": "trim"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 3,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Deep drive-through canopy edge: a slab soffit 2 blocks deep ending in a 1.5-block fascia (full trim block plus a bottom slab cap). Lines by slabs (Detail pp.20-21); supporting posts come from column components (Detail pp.28-29). repeat_u. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

@@ -1,0 +1,51 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-toplevel",
+ "version": "1.0.0",
+ "title": "Red Rock recessed top level (simplified)",
+ "size": {
+  "u": 2,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:black_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:black_stained_glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:black_stained_glass"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:black_stained_glass"
+  }
+ ],
+ "notes": "Recessed top level shown flush in darker (black) glass under a cream sill: a stated simplification of the setback, which would need air ops (rr-c2018-towerw, rr-c2010-hotel). (Detail pp.9-10). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

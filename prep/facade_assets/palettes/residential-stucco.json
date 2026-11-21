@@ -1,0 +1,37 @@
+{
+ "schema": "facade-palette-1",
+ "id": "residential-stucco",
+ "version": "1.0.0",
+ "title": "Summerlin residential stucco",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:white_terracotta",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:end_rod[facing=up]",
+  "frame": "minecraft:birch_trapdoor",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_quartz_slab",
+  "band": "minecraft:smooth_sandstone",
+  "parapet": "minecraft:white_terracotta",
+  "canopy": "minecraft:spruce_slab",
+  "column": "minecraft:smooth_quartz",
+  "door": "minecraft:spruce_door",
+  "roof": "minecraft:terracotta",
+  "roof-edge": "minecraft:granite_slab",
+  "sign": "minecraft:spruce_planks",
+  "trim": "minecraft:smooth_quartz"
+ },
+ "notes": "Warm beige stucco (white terracotta), white window trim and sills (smooth quartz), white end-rod window dividers (Detail p.11), gray glass with gray backing (Detail pp.4-5), wood door, clay-tile roof colour (terracotta / granite edge). Mullion here is an end rod, so storefront and curtain-wall components (which need a glass mullion) must not use this palette.",
+ "colour_refs": [
+  {
+   "role": "wall",
+   "target_srgb": "#cdb4a0",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  },
+  {
+   "role": "roof",
+   "target_srgb": "#9a5f45",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-stair-lintel",
+ "version": "1.0.0",
+ "title": "fx-stair-lintel",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "block": "minecraft:stone_brick_stairs[facing={facing_in},half=top]"
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)"
+}

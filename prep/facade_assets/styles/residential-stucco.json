@@ -1,0 +1,103 @@
+{
+ "schema": "facade-style-1",
+ "id": "residential-stucco",
+ "version": "1.0.0",
+ "kind": "style",
+ "title": "Residential stucco house (1-2 storey)",
+ "label": "STYLE-GENERATED (not observed)",
+ "license": "original (Moria)",
+ "evidence": {
+  "class": "style"
+ },
+ "applies_to": {
+  "building": [
+   "house",
+   "residential",
+   "detached",
+   "apartments"
+  ],
+  "max_levels": 2,
+  "min_face_len": 4
+ },
+ "palette": "lib:residential-stucco",
+ "components": {
+  "window": {
+   "ref": "lib:window-2x2-frame2"
+  },
+  "small_window": {
+   "ref": "lib:window-1x2-frame2"
+  },
+  "door": {
+   "ref": "lib:door-single"
+  },
+  "sill": {
+   "ref": "lib:sill"
+  },
+  "hood": {
+   "ref": "lib:hood"
+  },
+  "roof_edge": {
+   "ref": "lib:roof-edge"
+  },
+  "corner": {
+   "ref": "lib:corner-wrap"
+  }
+ },
+ "defaults": {
+  "exterior": {
+   "floors": {
+    "base_v": 0,
+    "height": 3,
+    "count": "auto"
+   },
+   "bays": {
+    "width": 4,
+    "residual": "center"
+   },
+   "ground": {
+    "openings": [
+     {
+      "component": "window",
+      "bays": "every 2",
+      "v": 1,
+      "align": "center",
+      "below": "sill",
+      "above": "hood"
+     },
+     {
+      "component": "door",
+      "bays": "center"
+     }
+    ]
+   },
+   "upper": {
+    "openings": [
+     {
+      "component": "small_window",
+      "bays": "all",
+      "v": 1,
+      "align": "center",
+      "below": "sill"
+     }
+    ]
+   },
+   "bands": [],
+   "corners": {
+    "component": "corner"
+   },
+   "parapet": {
+    "component": "roof_edge"
+   }
+  },
+  "shared": {
+   "wall_only": true
+  },
+  "unknown": {
+   "skip": true
+  }
+ },
+ "limits": {
+  "note": "styles cannot raise limits (architecture 5)"
+ },
+ "notes": "Beige stucco house: framed inset windows with white end-rod/trapdoor dividers (Detail pp.11-12), sills and hoods (Detail pp.20-21), single wood door, clay-tile coloured roof edge. Openings are spaced by bays, never random."
+}

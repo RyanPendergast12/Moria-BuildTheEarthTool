@@ -1,0 +1,37 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-door",
+ "version": "1.0.0",
+ "title": "fx-door",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "half": "lower",
+    "hinge": "left"
+   }
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "half": "upper",
+    "hinge": "left"
+   }
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)"
+}

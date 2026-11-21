@@ -76,3 +76,49 @@ egg-capture-protected-regions: egg-converted-regions.txt
 # Generate missing tile chunks before preparation/apply (one at a time per job). CAVEAT: TerraPlusMinus generation can hang a server
 # that is stopping mid-generation - stop the server only when /eggtool status shows no Egg jobs. false = tiles with ungenerated chunks are refused.
 egg-generate-missing: true
+
+# ---- Facade tool (v0.6): compiled facade plans for the targeted building. See docs/facade/COMMANDS.md and docs/facade/ARCHITECTURE.md.
+facade-enabled: true
+# Prep orchestrator (run with prep-python; arguments: <cache-dir> identify <x> <z> | plan <bid> --package <id>|--style <id> --seed N | auto <bid> ... | adopt <bid>).
+facade-prep-script: C:\BTE-Migration\repo\Moria-BuildTheEarthTool\prep\facade_prep.py
+# Design packages (passed to the prep as MORIA_FACADE_PACKAGES; also listed by tab completion of /facadetool select).
+facade-packages-dir: C:\BTE-Migration\repo\Moria-BuildTheEarthTool\packages
+# Op limits: chunk scope, and whole scope (a package's written limits.exception may raise whole to its own limits.max_ops, at most 400000).
+facade-max-ops-chunk: 8000
+facade-max-ops-whole: 60000
+# Placement budget per server tick (whichever limit is hit first; a component instance is never split across ticks).
+facade-blocks-per-tick: 300
+facade-place-ms-per-tick: 6
+# Chunks one Facade job may hold at once (sliding window over its scope, in chunk order): the cells' own chunks (plugin tickets),
+# the 4-neighbour ring its protection checks read, and outstanding async loads all count; never exceeded. Chunks loaded by players or
+# other plugins are never unloaded. A component whose chunks + ring exceed this is skipped with that reason (minimum 9).
+facade-max-loaded-chunks: 64
+# Per-request preparation timeout (killed and reported as a provider/timeout failure), and concurrent Facade jobs (preview/apply/adopt).
+facade-prep-timeout-seconds: 600
+facade-max-jobs: 1
+# BlueMap status events (one JSON line per job status change, same format as egg-events-file); empty = off.
+facade-events-file: ''
+# Deterministic compiler seed.
+facade-seed: 1
+# ---- Automatic facades (docs/facade/AUTO.md): /facadetool preview with no selection = auto (prep "auto": evidence -> analysis -> compile).
+# Observed (image-derived) faces where imagery is accepted; otherwise the fallback style, labelled STYLE-GENERATED (not observed).
+facade-auto-enabled: true
+# procedural = style-filled faces where nothing was observed; none = those faces get no ops.
+facade-fallback: procedural
+facade-fallback-style: summerlin-stucco-retail
+# Evidence providers, in order (local reference files, Mapillary Graph API, Panoramax STAC, OSM tags). Google imagery is never used.
+facade-providers: local,mapillary,panoramax,osm
+# Analysis backend: builtin-cv (local, free, deterministic); ollama (local VLM, once installed: set facade-ollama-model) or anthropic,
+# only when explicitly configured (AUTO.md 6).
+facade-analyzer: builtin-cv
+facade-ollama-model: ''
+# PATH of a secrets file OUTSIDE the repo holding the Mapillary client token (bare token, JSON or MAPILLARY_ACCESS_TOKEN=...).
+# Never put a secret value in this file. A missing file = Mapillary unavailable (env MAPILLARY_ACCESS_TOKEN also works).
+facade-secrets-file: C:\BTE-Migration\secrets\mapillary.token
+# Local reference images: <dir>/<bid>/*.jpg + refs.json. '' = the prep default.
+facade-refs-dir: ''
+facade-provider-timeout-seconds: 20
+facade-max-requests-per-job: 40
+# Paid analysis caps (only for the optional anthropic backend; 0 = never spend).
+facade-ai-max-usd-per-job: 0
+facade-ai-max-usd-per-day: 0

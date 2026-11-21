@@ -1,0 +1,58 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-1x2-grid",
+ "version": "1.0.0",
+ "title": "Window 1x2, inset, square grid",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame",
+   "props": {
+    "half": "bottom",
+    "type": "bottom",
+    "facing": "{facing}",
+    "open": "false",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Square-pattern window: checkerboard of the glass and mullion glass (the palette mullion must be a glass block for this variant), plus a frame line on the top row (Detail p.14). Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

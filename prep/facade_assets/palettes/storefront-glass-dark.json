@@ -1,0 +1,37 @@
+{
+ "schema": "facade-palette-1",
+ "id": "storefront-glass-dark",
+ "version": "1.0.0",
+ "title": "Dark storefront glazing system",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:gray_concrete",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:black_stained_glass",
+  "frame": "minecraft:polished_deepslate_slab",
+  "backing": "minecraft:light_gray_concrete",
+  "sill": "minecraft:polished_deepslate_slab",
+  "band": "minecraft:polished_deepslate",
+  "parapet": "minecraft:gray_concrete",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:polished_deepslate",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:light_gray_concrete",
+  "roof-edge": "minecraft:polished_deepslate_slab",
+  "sign": "minecraft:black_concrete",
+  "trim": "minecraft:polished_deepslate"
+ },
+ "notes": "Dark anodised aluminium storefront: gray glass, black-glass mullions every 2 blocks (Detail pp.3-4), charcoal piers and fascia. Backing is light gray concrete so the gray glass does not go black (Detail p.5: no black behind gray/black glass). Intended for the glazed zone under an opaque band; pair with a stucco palette zone for the band.",
+ "colour_refs": [
+  {
+   "role": "glass",
+   "target_srgb": "#3a3f44",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  },
+  {
+   "role": "mullion",
+   "target_srgb": "#1e1f21",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  }
+ ]
+}

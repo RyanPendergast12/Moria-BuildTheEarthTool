@@ -1,0 +1,28 @@
+{
+ "schema": "facade-component-1",
+ "id": "roof-edge",
+ "version": "1.0.0",
+ "title": "Roof edge",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "roof-edge",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Plain roof-edge line at the measured top (slab line, Detail pp.20-21). Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

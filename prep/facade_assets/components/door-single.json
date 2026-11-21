@@ -1,0 +1,41 @@
+{
+ "schema": "facade-component-1",
+ "id": "door-single",
+ "version": "1.0.0",
+ "title": "Single door (complete)",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "lower",
+    "hinge": "left"
+   }
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "upper",
+    "hinge": "left"
+   }
+  }
+ ],
+ "notes": "Both halves in one atomic component, explicit facing/half/hinge/open/powered (Detail p.16 notes doors as thin elements; architecture section 4: no half doors). Needs a solid block at v=-1 in the world or plan. facing = inward (the direction a player outside looks), hinge=left = the u=0 side seen from outside. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

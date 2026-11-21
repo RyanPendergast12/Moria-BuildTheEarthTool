@@ -1,0 +1,315 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-ledge-g",
+ "version": "1.0.0",
+ "title": "Red Rock ledgestone, 10-row base",
+ "size": {
+  "u": 5,
+  "v": 10
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 4,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 5,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 0,
+   "v": 6,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 0,
+   "v": 9,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 4,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 5,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 6,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 1,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 1,
+   "v": 9,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 3,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 2,
+   "v": 4,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 2,
+   "v": 5,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 6,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 2,
+   "v": 9,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 3,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 3,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 4,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 5,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 3,
+   "v": 6,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 3,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 3,
+   "v": 9,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 3,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 4,
+   "v": 4,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 5,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 6,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  },
+  {
+   "u": 4,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 4,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:cut_sandstone"
+  },
+  {
+   "u": 4,
+   "v": 9,
+   "w": 0,
+   "block": "minecraft:sandstone"
+  }
+ ],
+ "notes": "Ledgestone for the 10-row plinth floor of the tower piers (base junction poorly covered: inferred continuation). (Detail p.24). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

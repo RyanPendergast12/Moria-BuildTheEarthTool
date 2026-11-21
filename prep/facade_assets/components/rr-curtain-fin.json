@@ -1,0 +1,61 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-curtain-fin",
+ "version": "1.0.0",
+ "title": "Red Rock tower continuous bronze curtain wall, 3-row floor with projecting fin",
+ "size": {
+  "u": 1,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "block": "minecraft:brown_concrete"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": -1,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "trim",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "One 3-block floor of the hotel tower as a CONTINUOUS bronze reflective curtain wall: bronze glass across the band, no visible mullion grid; the floor line is the same bronze glass over a brown concrete spandrel, a thin same-tone darker line (Detail pp.2-3: floor lines first; pp.4-5: odd glass colour only with other detail, here the ledgestone piers and cream frame; black backing colour chosen to stay in the bronze tone). E (convex) face: light metal fin projecting 1 block at every floor (rr-c2010-hotel, rr-c2010-night). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

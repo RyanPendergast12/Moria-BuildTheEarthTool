@@ -1,0 +1,33 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-frame",
+ "version": "1.0.0",
+ "title": "Red Rock cream frame, 3-row floor",
+ "size": {
+  "u": 1,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  }
+ ],
+ "notes": "Cream stucco frame around the tower glass field (rr-c2018-towerw, rr-c2024-3185). (Detail p.30 (colour first)). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

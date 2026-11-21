@@ -1,0 +1,107 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-baystrip",
+ "version": "1.0.0",
+ "title": "Red Rock S-end bronze bay strip",
+ "size": {
+  "u": 4,
+  "v": 3
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 1,
+   "role": "sill",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 1,
+   "role": "sill",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 3,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 3,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": 0,
+   "block": "minecraft:brown_stained_glass"
+  }
+ ],
+ "notes": "Single vertical strip of bronze glazing on the SW (S) end with a stepped per-floor frame: cream frame, a projecting slab ledge per floor (Detail pp.20-21), bronze glass with automatic backing (rr-c2024-3185, 2024). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

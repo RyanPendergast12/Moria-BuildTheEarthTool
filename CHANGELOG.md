@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.6.0 (unreleased): Facade tool for detailed exteriors and landmark design packages
+- **New `/facadetool`** (inspect, select, preview, apply chunk or bounded whole, adopt, status, cancel, undo), separate from Snowball and Egg; no item binding.
+- **Design packages** (`facade-package-1`, `packages/<id>/`), validated as data only:
+  - no code, aliases or paths outside the allowed roots;
+  - size, hazard-block and limit checks.
+  - Compiled by `prep/facade_compile.py` into deterministic whole-building plans (`facade-plan-1`) with per-block evidence classes.
+- **Geometry** (`prep/facade_geometry.py`): facade-local coordinates on the shell's own wall cells (100% shell match on Harlo and pilot buildings), curved and segmented faces, parts and setbacks, shared and party walls, envelopes.
+- **Library** (`prep/facade_assets/`): the 1.18.2 block table, derived colour table, 7 palettes, 62 original components (windows, frames, doors, canopies, columns, louvers, block lettering) and 4 styles, with role-constrained palette selection.
+- **Packages:**
+  - **Red Rock Casino:** 22 LiDAR-measured parts (the OSM tower outline is about 21 m off), a curved 65 m tower (arc R≈280 m), reference detail on the tower, courtyard and NW entrance, and measured massing elsewhere.
+  - **Harlo:** reproduces its accepted detailing exactly (1,236/1,236).
+- **Ownership and adoption:** replacement only of eligible owned cells; verified adoption of pilot shells and accepted detail jobs; component atomicity; attached-work and party-wall protection.
+- **Retirement:** restores the pre-facade state across old and new chunks.
+- **Shared writer:** a `matchesAfter()` helper is shared by all three tools. Snowball and Egg behaviour is unchanged.
+- **ASSISTED zones** (`tools/facade_label.py`, `docs/facade/ASSISTED-ZONES.md`): a person draws glazing, material and awning zones on an aligned photo and may choose the block for each material zone (otherwise matched to the photo colour). Always labelled ASSISTED, never automatic.
+- **Deploy tools:** `tools/deploy_facade_primary.py` and the `.bat` wrappers, pinned to the approved JAR and prep/package tree hashes.
+
 ## v0.5.0 (2026-10-29, approved in-game): Egg tool for terrain, vegetation and agriculture
 - **New `/eggtool`**, separate from Snowball.
   - An egg that hits a block selects a fixed 4×4-chunk tile, using floor division.

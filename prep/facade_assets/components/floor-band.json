@@ -1,0 +1,21 @@
+{
+ "schema": "facade-component-1",
+ "id": "floor-band",
+ "version": "1.0.0",
+ "title": "Floor band, flush",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "band"
+  }
+ ],
+ "notes": "Floor line in the wall plane, one consistent element on every floor (Detail pp.2-3).",
+ "license": "original (Moria)"
+}

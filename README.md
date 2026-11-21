@@ -88,6 +88,30 @@ Details:
 - Specs: [terrain](docs/egg/TERRAIN-SPEC.md), [vegetation](docs/egg/VEGETATION-SPEC.md), [agriculture](docs/egg/AGRICULTURE-SPEC.md).
 - Tests: [docs/egg/TESTS-v0.5.md](docs/egg/TESTS-v0.5.md).
 
+## Facade: detailed exteriors and landmark packages (v0.6, in development)
+`/facadetool` turns a building's measured shell into a detailed exterior: windows, mullions, backing, sills, frames, floor bands, parapets, canopies, columns, roof edges and simplified block lettering.
+- **Two paths, always labelled:**
+  - **reference-matched packages** describe a real building from dated, licensed references and measurements. Examples: Red Rock Casino (`packages/red-rock-casino`) and Harlo (`packages/harlo-w348127357`, which reproduces its accepted detailing cell for cell);
+  - **styles** are explicitly selected templates for buildings with only geometry: `summerlin-stucco-retail`, `storefront-under-opaque-band`, `lowrise-office`, `residential-stucco`. They are reported as `STYLE-GENERATED (not observed)`. There is no default style.
+- Every planned block carries its evidence class (`reference`, `measured`, `inferred` or `style`). Faces without evidence stay **unresolved**: no invented windows, signs or entrances.
+- **No AI at runtime.** Packages are validated data compiled by deterministic code into block plans, applied by the same protected writer, ledger, locks and undo as Snowball and Egg.
+
+| command | effect |
+|---|---|
+| `/facadetool inspect` | Identify the building you look at, its parts, packages and styles. |
+| `/facadetool select <package> \| style:<id> \| none` | Choose what to build (cleared on login and restart). |
+| `/facadetool preview [chunk\|whole]` | Report only. `whole` shows the envelope, chunks and op count. |
+| `/facadetool apply [chunk]` / `apply whole confirm` | Build in the targeted chunk, or (after a whole preview) the bounded whole building. |
+| `/facadetool adopt [confirm]` | Make pre-ledger shells and accepted detail ownable, exact cells only. Changes nothing in the world. |
+| `/facadetool status` / `cancel` / `undo [job] [confirm]` | As for Egg. |
+
+**Safety:**
+- Only air, or blocks a Moria job demonstrably owns, are replaced. Material equality is never ownership.
+- Player work, attached blocks, containers, entities, roads, Egg work, neighbouring buildings and the Strip are never touched.
+- Components such as windows and doors are placed whole or not at all.
+
+Details: [docs/facade/ARCHITECTURE.md](docs/facade/ARCHITECTURE.md), [COMMANDS](docs/facade/COMMANDS.md), [PACKAGE-SCHEMA](docs/facade/PACKAGE-SCHEMA.md), [tests](docs/facade/TESTS-v0.6.md).
+
 ## Overpasses (automatic mode; off by default)
 With `overpass-enabled: true` and `overpass-mode: auto`, a `roads` or `both` snowball automatically discovers every road bridge in the map data near the chunk. Each one is measured and checked; eligible ones are built (deck plus approaches), the rest are skipped with a specific reason. There is no per-bridge list to maintain.
 

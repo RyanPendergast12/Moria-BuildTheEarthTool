@@ -1,0 +1,143 @@
+{
+ "schema": "facade-component-1",
+ "id": "column-2x2-base",
+ "version": "1.0.0",
+ "title": "Column 2x2 base",
+ "size": {
+  "u": 4,
+  "v": 1
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 1,
+   "v": 0,
+   "w": 1,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 2,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 1,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 2,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 2,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 1,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 2,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 3,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 3,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 3,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 3,
+   "role": "trim",
+   "props": {
+    "type": "bottom",
+    "half": "bottom",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Widened foot of a 2x2 column: bottom slabs ring the column on three sides (Detail p.28). Anchor u=0 is one block left of the column; the column itself is u=1..2. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

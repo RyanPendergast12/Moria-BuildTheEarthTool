@@ -1,0 +1,807 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-entry",
+ "version": "1.0.0",
+ "title": "Red Rock casino entrance (post-2014 NW entrance)",
+ "size": {
+  "u": 12,
+  "v": 11
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 3,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 4,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 5,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 3,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 4,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 5,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 1,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 2,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 2,
+   "v": 2,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 2,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 2,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 2,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 2,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 2,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 3,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 3,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 3,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 3,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 3,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 3,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 3,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 3,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 3,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 3,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 3,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 4,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 4,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 4,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 4,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 4,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 4,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 4,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 4,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 4,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 4,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 4,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 5,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 5,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 5,
+   "v": 2,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 5,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 5,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 5,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 5,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 5,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 5,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 5,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 5,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 6,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 6,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 6,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 6,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 6,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 6,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 6,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 6,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 6,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 6,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 6,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 7,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 7,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 7,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 7,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 7,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 7,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 7,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 7,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 7,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 7,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 7,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 8,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 8,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 8,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 8,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 8,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 8,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 8,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 8,
+   "v": 7,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 8,
+   "v": 8,
+   "w": 0,
+   "block": "minecraft:gray_stained_glass"
+  },
+  {
+   "u": 8,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 8,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 9,
+   "v": 0,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 9,
+   "v": 1,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 9,
+   "v": 2,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 9,
+   "v": 3,
+   "w": 0,
+   "role": "mullion"
+  },
+  {
+   "u": 9,
+   "v": 4,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 9,
+   "v": 5,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 9,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 9,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 9,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 9,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 9,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 1,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 2,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 3,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 4,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 5,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 10,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 1,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 2,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 3,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 4,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 5,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 6,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 7,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 8,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 9,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 11,
+   "v": 10,
+   "w": 0,
+   "role": "column"
+  }
+ ],
+ "notes": "Red sandstone piers (2 cols, ~2 m) flank 8 cols of glass doors and storefront (~2.4-3 m doors, 3 rows); a mullion transom row; a white fascia band behind the box canopy; a red stone mass with an upper glazing band below the wood-soffit roof. Proportions are image estimates from rr-c2018-nwentry (px/m from the door height). (Detail pp.10-15 (frames), pp.28-29 (piers)). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

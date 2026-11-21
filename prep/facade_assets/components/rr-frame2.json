@@ -1,0 +1,51 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-frame2",
+ "version": "1.0.0",
+ "title": "Red Rock cream frame jamb, 2 cols",
+ "size": {
+  "u": 2,
+  "v": 3
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "frame"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "role": "frame"
+  }
+ ],
+ "notes": "Cream stucco jamb (~0.6-0.7 floor heights, estimate) between the ledgestone pier and the W-face glass (rr-c2018-towerw). (Detail p.30). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

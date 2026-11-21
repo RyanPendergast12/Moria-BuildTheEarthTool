@@ -1,0 +1,35 @@
+{
+ "schema": "facade-palette-1",
+ "id": "fx-tan",
+ "version": "1.0.0",
+ "title": "fixture tan",
+ "roles": {
+  "wall": "minecraft:smooth_sandstone",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:black_stained_glass",
+  "frame": "minecraft:spruce_trapdoor",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_quartz_slab",
+  "band": "minecraft:cut_sandstone",
+  "parapet": "minecraft:smooth_sandstone",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:cut_sandstone",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:white_concrete",
+  "roof-edge": "minecraft:smooth_sandstone_slab",
+  "sign": "minecraft:black_concrete",
+  "trim": "minecraft:cut_sandstone"
+ },
+ "texture": {
+  "wall": {
+   "alt": "minecraft:sandstone",
+   "rule": "rows%3==2"
+  }
+ },
+ "zones": {
+  "podium": {
+   "wall": "minecraft:smooth_quartz"
+  }
+ },
+ "notes": "fixture"
+}

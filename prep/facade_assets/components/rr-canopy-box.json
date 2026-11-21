@@ -1,0 +1,57 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-canopy-box",
+ "version": "1.0.0",
+ "title": "Red Rock entrance box canopy",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "canopy",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 2,
+   "role": "canopy",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 3,
+   "role": "canopy",
+   "props": {
+    "type": "top",
+    "waterlogged": "false"
+   }
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 4,
+   "role": "band"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 4,
+   "role": "band"
+  }
+ ],
+ "notes": "White box canopy of the casino entrance: slab soffit 3 deep and a 2-row white fascia at 4 blocks (fascia ~1.3 m; depth estimate 4-6 m), rr-c2018-nwentry. (Detail pp.20-21 (slab lines)). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

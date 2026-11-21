@@ -1,0 +1,28 @@
+{
+ "schema": "facade-component-1",
+ "id": "corner-quoin",
+ "version": "1.0.0",
+ "title": "Corner, quoins",
+ "size": {
+  "u": 1,
+  "v": 2
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "trim"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "wall"
+  }
+ ],
+ "notes": "Alternating trim/wall courses on the corner column, a deliberate repeating pattern (Detail p.3, p.24). repeat_v.",
+ "license": "original (Moria)"
+}

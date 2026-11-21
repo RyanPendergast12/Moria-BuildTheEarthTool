@@ -1,0 +1,87 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-ribbon-inset",
+ "version": "1.0.0",
+ "title": "Ribbon window, inset, repeating",
+ "size": {
+  "u": 2,
+  "v": 2
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "mullion"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "mullion"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  }
+ ],
+ "notes": "Ribbon glazing set back 1 block (Detail pp.9-10), mullion every 2nd block (Detail pp.3-4).",
+ "license": "original (Moria)"
+}

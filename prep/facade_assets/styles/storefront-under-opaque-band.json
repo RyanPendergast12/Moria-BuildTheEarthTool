@@ -1,0 +1,104 @@
+{
+ "schema": "facade-style-1",
+ "id": "storefront-under-opaque-band",
+ "version": "1.0.0",
+ "kind": "style",
+ "title": "Glass storefront under an opaque upper band",
+ "label": "STYLE-GENERATED (not observed)",
+ "license": "original (Moria)",
+ "evidence": {
+  "class": "style"
+ },
+ "applies_to": {
+  "building": [
+   "retail",
+   "commercial",
+   "yes"
+  ],
+  "max_levels": 1,
+  "min_face_len": 4
+ },
+ "palette": "lib:storefront-glass-dark",
+ "components": {
+  "storefront": {
+   "ref": "lib:storefront-bay"
+  },
+  "door": {
+   "ref": "lib:door-double"
+  },
+  "band": {
+   "ref": "lib:floor-band-proj"
+  },
+  "cornice": {
+   "ref": "lib:cornice"
+  },
+  "sign": {
+   "ref": "lib:sign-text"
+  },
+  "parapet": {
+   "ref": "lib:parapet-cap"
+  },
+  "corner": {
+   "ref": "lib:corner-glass"
+  }
+ },
+ "defaults": {
+  "exterior": {
+   "floors": {
+    "base_v": 0,
+    "height": 4,
+    "count": 1
+   },
+   "bays": {
+    "width": 4,
+    "residual": "ends"
+   },
+   "ground": {
+    "openings": [
+     {
+      "component": "storefront",
+      "bays": "all"
+     },
+     {
+      "component": "door",
+      "bays": "center"
+     }
+    ]
+   },
+   "upper": {
+    "fill": "band",
+    "top": {
+     "component": "cornice"
+    },
+    "sign": {
+     "component": "sign",
+     "text": null,
+     "note": "only when assigned"
+    }
+   },
+   "bands": [
+    {
+     "component": "band",
+     "at": "v4"
+    }
+   ],
+   "corners": {
+    "component": "corner",
+    "floors": "ground"
+   },
+   "parapet": {
+    "component": "parapet"
+   }
+  },
+  "shared": {
+   "wall_only": true
+  },
+  "unknown": {
+   "skip": true
+  }
+ },
+ "limits": {
+  "note": "styles cannot raise limits (architecture 5)"
+ },
+ "notes": "Single-storey storefront: full-height dark glazing to the transom, then a solid opaque band up to the measured top (no openings), projecting band at the transom and a cornice. Glazed corners on the ground floor only. Lettering is off unless a package assigns text (BUILDING-STANDARDS 8)."
+}

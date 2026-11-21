@@ -1,0 +1,34 @@
+{
+ "schema": "facade-component-1",
+ "id": "floor-band-proj",
+ "version": "1.0.0",
+ "title": "Floor band, projecting",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "band"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "band",
+   "props": {
+    "type": "top",
+    "half": "top",
+    "facing": "{facing_in}",
+    "shape": "straight",
+    "waterlogged": "false"
+   }
+  }
+ ],
+ "notes": "Floor line that projects 1 block as a top slab or upside-down stair (Detail pp.2-3: flush, projecting or recessed, but the same everywhere on the facade). Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

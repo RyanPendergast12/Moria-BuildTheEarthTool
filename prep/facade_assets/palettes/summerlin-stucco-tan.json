@@ -1,0 +1,43 @@
+{
+ "schema": "facade-palette-1",
+ "id": "summerlin-stucco-tan",
+ "version": "1.0.0",
+ "title": "Summerlin tan stucco retail",
+ "status": "accepted",
+ "roles": {
+  "wall": "minecraft:smooth_sandstone",
+  "glass": "minecraft:gray_stained_glass",
+  "mullion": "minecraft:black_stained_glass",
+  "frame": "minecraft:spruce_trapdoor",
+  "backing": "minecraft:gray_concrete",
+  "sill": "minecraft:smooth_sandstone_slab",
+  "band": "minecraft:cut_sandstone",
+  "parapet": "minecraft:smooth_sandstone",
+  "canopy": "minecraft:smooth_stone_slab",
+  "column": "minecraft:cut_sandstone",
+  "door": "minecraft:iron_door",
+  "roof": "minecraft:white_concrete",
+  "roof-edge": "minecraft:cut_sandstone_slab",
+  "sign": "minecraft:brown_terracotta",
+  "trim": "minecraft:cut_sandstone"
+ },
+ "texture": {
+  "column": {
+   "alt": "minecraft:sandstone",
+   "rule": "rows%2==1"
+  }
+ },
+ "notes": "Tan stucco body, slightly darker cut-sandstone trim zone (bands, columns, coping), dark bronze storefront: gray glass with black-glass mullions every 2nd column (Detail pp.3-5), gray concrete backing 1 block behind (Detail p.5; not black behind gray). Column texture alternates two near-identical sandstones by rows (Detail p.24). Colour before texture (Detail p.30).",
+ "colour_refs": [
+  {
+   "role": "wall",
+   "target_srgb": "#d9c9a0",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  },
+  {
+   "role": "glass",
+   "target_srgb": "#3f474c",
+   "source": "style estimate of typical Summerlin finish (not measured)"
+  }
+ ]
+}

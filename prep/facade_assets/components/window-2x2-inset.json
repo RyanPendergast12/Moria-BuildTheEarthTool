@@ -1,0 +1,87 @@
+{
+ "schema": "facade-component-1",
+ "id": "window-2x2-inset",
+ "version": "1.0.0",
+ "title": "Window 2x2, 1-block inset",
+ "size": {
+  "u": 2,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "block": "minecraft:air"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -1,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": -2,
+   "role": "backing"
+  }
+ ],
+ "notes": "Glass set 1 block back from the wall plane for depth; backing 1 block behind the glass (Detail pp.4-5, 9-10). Inset glass reads darker; a palette may pick one lighter glass shade (Detail p.9). The wall-plane cells become air (allowed only on eligible owned cells).",
+ "license": "original (Moria)"
+}

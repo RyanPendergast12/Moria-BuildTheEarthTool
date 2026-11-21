@@ -1,0 +1,28 @@
+{
+ "schema": "facade-component-1",
+ "id": "column-1x1",
+ "version": "1.0.0",
+ "title": "Column 1x1 (pilaster)",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "column"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "column"
+  }
+ ],
+ "notes": "Projecting 1x1 pier in front of the wall line, palette column block (Detail pp.28-29). Stacked parts may alternate two near-identical blocks by the palette texture rule (Detail p.24). Two columns within 2 blocks must be merged or re-spaced (Detail pp.22-23). repeat_v.",
+ "license": "original (Moria)"
+}

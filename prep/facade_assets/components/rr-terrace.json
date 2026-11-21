@@ -1,0 +1,33 @@
+{
+ "schema": "facade-component-1",
+ "id": "rr-terrace",
+ "version": "1.0.0",
+ "title": "Red Rock podium terrace glazing",
+ "size": {
+  "u": 1,
+  "v": 3
+ },
+ "repeat_u": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  }
+ ],
+ "notes": "Recessed terrace glazing between the cream stucco bands of the podium courtyard (rr-c2013-pool), flush simplification. (Detail pp.9-10 (flush instead of inset)). Red Rock (agent A): see packages/red-rock-casino/EVIDENCE.md",
+ "license": "original (Moria)"
+}

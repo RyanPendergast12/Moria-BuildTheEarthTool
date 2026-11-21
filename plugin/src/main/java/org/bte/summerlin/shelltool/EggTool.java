@@ -181,7 +181,7 @@ final class EggTool implements Listener, TabExecutor {
         EggJob run = jobs.get(tk);
         if (run != null) { who.sendMessage("§e[Egg] Job " + run.id + " is already running for tile " + tx + "," + tz + " (" + run.stage + ")."); return; }
         for (int dx = 0; dx < 4; dx++) for (int dz = 0; dz < 4; dz++) { long k = key(4 * tx + dx, 4 * tz + dz);
-            if (pl.regionLocks.containsKey(k) || pl.activeChunks.containsKey(k)) { who.sendMessage("§e[Egg] Tile " + tx + "," + tz + " is busy: a ShellTool job is running in chunk " + (4 * tx + dx) + "," + (4 * tz + dz) + ". Try again after it finishes."); return; } }
+            if (pl.regionLocks.containsKey(k) || pl.activeChunks.containsKey(k)) { who.sendMessage("§e[Egg] Tile " + tx + "," + tz + " is busy: " + (pl.regionLocks.containsKey(k) ? pl.lockHolder(k) : "a Snowball job") + " is running in chunk " + (4 * tx + dx) + "," + (4 * tz + dz) + ". Try again after it finishes."); return; } }
         if (jobs.size() >= maxJobs) { who.sendMessage("§e[Egg] Queue full (" + maxJobs + " active Egg jobs)."); return; }
         String id = String.format("%tY%<tm%<td-%<tH%<tM%<tS-e%d", new Date(), pl.seq.incrementAndGet());
         EggJob j = new EggJob(id, u, who, w, x, y, z, tx, tz, mode, content); jobs.put(tk, j);
@@ -517,7 +517,7 @@ final class EggTool implements Listener, TabExecutor {
                 hold(ac); begin();
             }));
         }
-        private void hold(List<Chunk> cs) { for (Chunk c : cs) if (c != null && !done) { c.addPluginChunkTicket(pl); held.add(c); } }
+        private void hold(List<Chunk> cs) { for (Chunk c : cs) if (c != null && !done) { pl.ticket(c); held.add(c); } }
         void begin() {
             if (done) return;
             for (Chunk c : held) {
@@ -684,7 +684,7 @@ final class EggTool implements Listener, TabExecutor {
         void finish() {
             if (done) return; done = true; stage = "done";
             if (task != null) task.cancel();
-            for (Chunk c : held) c.removePluginChunkTicket(pl); held.clear();
+            for (Chunk c : held) pl.unticket(c); held.clear();
             jobs.remove(key(tx, tz), this);
             for (int dx = 0; dx < 4; dx++) for (int dz = 0; dz < 4; dz++) pl.regionLocks.remove(key(4 * tx + dx, 4 * tz + dz), id);
             if (mode == Mode.APPLY) pl.flush();
@@ -790,7 +790,7 @@ final class EggTool implements Listener, TabExecutor {
                 }
                 case "undo" -> { String job = null; boolean confirm = false;
                     for (int i = 1; i < a.length; i++) if (a[i].equalsIgnoreCase("confirm")) confirm = true; else job = a[i];
-                    pl.undo(s, job, confirm, true); }
+                    pl.undo(s, job, confirm, "egg"); }
                 // ---- admin/console test hooks: each runs the same code as the real interaction
                 case "simset" -> {
                     if (!admin || a.length < 4) return say(s, "/eggtool simset <uuid> <off|preview|on> <terrain|vegetation|agriculture|all>");

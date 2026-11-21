@@ -1,0 +1,22 @@
+{
+ "schema": "facade-component-1",
+ "id": "column-thin",
+ "version": "1.0.0",
+ "title": "Thin column",
+ "size": {
+  "u": 1,
+  "v": 1
+ },
+ "repeat_u": false,
+ "repeat_v": true,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "block": "minecraft:polished_blackstone_wall"
+  }
+ ],
+ "notes": "Thin post (dark steel look) 1 block out from the wall: a wall block, whose up/side states the compiler computes from the full plan (Detail pp.28-29: thin = end rods, fences, walls, bars, panes). repeat_v over the column height.",
+ "license": "original (Moria)"
+}

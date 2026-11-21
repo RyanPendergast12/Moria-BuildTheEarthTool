@@ -1,0 +1,67 @@
+{
+ "schema": "facade-component-1",
+ "id": "door-double",
+ "version": "1.0.0",
+ "title": "Double door (complete)",
+ "size": {
+  "u": 2,
+  "v": 2
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 0,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "lower",
+    "hinge": "left"
+   }
+  },
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "upper",
+    "hinge": "left"
+   }
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "lower",
+    "hinge": "right"
+   }
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "door",
+   "props": {
+    "facing": "{facing_in}",
+    "open": "false",
+    "powered": "false",
+    "half": "upper",
+    "hinge": "right"
+   }
+  }
+ ],
+ "notes": "Pair of leaves with hinges on the outer sides (u=0 left, u=1 right, seen from outside), all four halves explicit and placed atomically (architecture section 4; Detail p.16). Needs solid support at v=-1. Cell \"props\" are merged into the palette block only where that block has the property (format note in COMPONENTS.md).",
+ "license": "original (Moria)"
+}

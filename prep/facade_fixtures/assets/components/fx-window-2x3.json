@@ -1,0 +1,61 @@
+{
+ "schema": "facade-component-1",
+ "id": "fx-window-2x3",
+ "version": "1.0.0",
+ "title": "fx-window-2x3",
+ "size": {
+  "u": 2,
+  "v": 3
+ },
+ "repeat_u": false,
+ "cells": [
+  {
+   "u": 0,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 1,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 1,
+   "v": 2,
+   "w": 0,
+   "role": "glass"
+  },
+  {
+   "u": 0,
+   "v": 0,
+   "w": 1,
+   "role": "sill",
+   "props": {
+    "type": "top",
+    "half": "top",
+    "facing": "{facing}"
+   }
+  },
+  {
+   "u": 1,
+   "v": 0,
+   "w": 1,
+   "role": "sill",
+   "props": {
+    "type": "top",
+    "half": "top",
+    "facing": "{facing}"
+   }
+  }
+ ],
+ "notes": "synthetic fixture (Detail pp.4-5)",
+ "license": "original (Moria)"
+}
