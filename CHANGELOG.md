@@ -1,6 +1,7 @@
 # Changelog
 
-## v0.7.0 (unreleased; in testing as v0.7.0-rc1): parking lots in the snowball tool
+## v0.7.0 (2026-11-20, approved in-game): parking lots in the snowball tool (current version)
+Includes the v0.6.0 Facade tool (below), released here for the first time.
 - **Parking lots** are generated with the roads (`/shelltool content roads` or `both`) and reported on their own `parking` line in chat and in the job report.
   - **Lot surface:** mapped `amenity=parking` areas with `parking=surface` (or no `parking` tag), paved with the road asphalt. Street-side, lay-by, lane, underground, covered and layered parking is reported as unsupported, not built.
   - **Aisles:** `service=parking_aisle` ways, previously skipped by the pilot rule, are paved as unmarked 7.2 m service carriageways (width ESTIMATE). `drive-through` is still skipped.
@@ -11,7 +12,7 @@
 - `prep/test_parking.py`: offline check of lot, aisle and stall-line generation.
 - `tools/build_plugin.sh`: reproducible javac build of the JAR.
 
-## v0.6.0 (unreleased; latest prerelease v0.6.0-rc5): Facade tool for detailed exteriors and landmark design packages
+## v0.6.0 (prereleases rc1-rc5; released as part of v0.7.0): Facade tool for detailed exteriors and landmark design packages
 - **New `/facadetool`** (inspect, select, preview, apply chunk or bounded whole, adopt, status, cancel, undo), separate from Snowball and Egg; no item binding.
 - **Design packages** (`facade-package-1`, `packages/<id>/`), validated as data only:
   - no code, aliases or paths outside the allowed roots;
@@ -51,7 +52,7 @@
 - **Path overrides:** data paths can be set with `MORIA_*` environment variables.
 - **Roadmap:** v0.5 is Egg; portability moves to v0.6.
 
-## v0.4.3 (2026-10-29): automatic overpasses (current version)
+## v0.4.3 (2026-10-29): automatic overpasses
 - **Automatic mode** (`overpass-mode: auto`, the default once `overpass-enabled: true`): `roads` and `both` throws discover every carriageway bridge nearby, measure it and check eligibility. Eligible ones are built with their approaches; the rest are skipped with a specific reason in the report.
   - The previous behaviour remains as `overpass-mode: allowlist`.
   - `overpass-exclude` blocks individual crossings.

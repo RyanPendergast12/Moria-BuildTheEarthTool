@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.5.0 (alpha): the Egg tool for terrain, vegetation and agriculture.** Download `SummerlinShellTool-0.5.0.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.5.0). It was approved in-game on 2026-10-29; see [docs/egg/TESTS-v0.5.md](docs/egg/TESTS-v0.5.md). Snowball (shells, roads, overpasses) is unchanged from v0.4.3 apart from undo now keeping tracked player edits. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.7.0 (alpha): parking lots in the snowball tool, plus the Facade tool for building exteriors.** Download `SummerlinShellTool-0.7.0.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.7.0). It was approved in-game on 2026-11-20. Snowball now paves mapped surface parking lots and aisles and generates stall lines; the Facade tool (`/facadetool`) adds ASSISTED facades from aligned photos with person-drawn zones. Egg is unchanged. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.
