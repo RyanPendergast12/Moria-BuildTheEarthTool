@@ -65,7 +65,7 @@ The guide's example cross-sections (Russia, Estonia, Czechia, Liechtenstein, pp.
 - `bridge`, `tunnel`, `layer≠0` and `covered` carriageways are **skipped and reported** ("deck/tunnel elevation not resolved from evidence"). The ground road beneath, for example CC-215 under the Charleston bridges, is generated normally.
 - No deck is ever draped on the ground or invented from a `layer` tag.
 - Ramps (`*_link`) at ground level are generated. Separate carriageways come from their own one-way ways.
-- Parking (v0.7): `service=parking_aisle` ways are generated as unmarked service carriageways, mapped surface `amenity=parking` lots are paved, and stall lines are GENERATED (2.7 m x 5.5 m, 90 degrees to the aisle). Not generated: `service=drive-through` (pilot rule), `construction`/`proposed`, paths, cycleways and pedestrian areas. All are reported.
+- Parking (v0.7): `service=parking_aisle` ways are generated as unmarked service carriageways, mapped surface `amenity=parking` lots are paved, and stall lines are GENERATED (2.7 m x 5.5 m, 90 degrees to the aisle). v0.7.1: an aisle outside every mapped `amenity=parking` area gets an INFERRED lot one stall depth wide on each side (role `parking-inferred`). Not generated: `service=drive-through` (pilot rule), `construction`/`proposed`, paths, cycleways and pedestrian areas. All are reported.
 
 ## 6. Writer rules for road cells (plugin, re-checked in the writing tick)
 1. **Strip exclusion:** checked per cell, at all heights. A chunk touching the Strip is refused before anything is fetched.

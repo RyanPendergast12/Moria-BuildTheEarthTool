@@ -211,22 +211,33 @@ def chunk_roads(cx, cz, geo, feats, OV, cache, approach=True):
     M = build_model(ways_mc, areas_mc, BPM)
     lot_mc = [(f, Polygon(r)) for f in lots for r in P[f['id']].values()]          # outer rings (islands/holes are paved; buildings still win)
     aisles = {f['id'] for kind, f, L in ways_mc if f['tags'].get('service') == 'parking_aisle'}
-    def parking(x, z):
-        P_ = Point(x + 0.5, z + 0.5); lot = next((f for f, pg in lot_mc if pg.contains(P_)), None)
-        if lot is None: return None
+    # v0.7.1 INFERRED lots: an aisle outside every mapped amenity=parking area (any type) gets one stall depth of lot each side
+    park_ll = [f['geom'] for f in feats if f['kind'] == 'parking' and f['geom'].geom_type in ('Polygon', 'MultiPolygon')]
+    orphan = {f['id'] for kind, f, L in ways_mc if f['id'] in aisles and not any(f['geom'].intersects(g) for g in park_ll)}
+    def stall(P_, ids):
+        """nearest aisle in ids that P_ lies beside (within one stall depth, between its ends): (dist, aisle, s, on_stall_line) or None"""
         best = None
         for c in M['carr']:
-            if c['id'] not in aisles: continue
+            if c['id'] not in ids: continue
             s_ = c['L'].project(P_)
             if not (0 < s_ < c['L'].length): continue                             # beside the aisle, not beyond its ends
             dist = c['L'].distance(P_)
             if c['half'] < dist <= c['half'] + STALL_D * BPM and (best is None or dist < best[0]): best = (dist, c, s_)
-        if best:
-            dist, c, s_ = best; L = c['L']; q2 = L.interpolate(min(s_ + 0.5, L.length)); q1 = L.interpolate(max(s_ - 0.5, 0))
-            ux, uz = q2.x - q1.x, q2.y - q1.y; n_ = math.hypot(ux, uz) or 1
-            thin = 0.5 * max(abs(ux), abs(uz)) / n_ / BPM; m = (s_ / BPM) % STALL_W
-            if min(m, STALL_W - m) < thin:
-                return (WHITE, 'parking-stripe', lot['id'], f'GENERATED stall line (not observed): {STALL_W} m x {STALL_D} m stalls at 90 deg to aisle {c["id"]} (ESTIMATE)')
+        if not best: return None
+        dist, c, s_ = best; L = c['L']; q2 = L.interpolate(min(s_ + 0.5, L.length)); q1 = L.interpolate(max(s_ - 0.5, 0))
+        ux, uz = q2.x - q1.x, q2.y - q1.y; n_ = math.hypot(ux, uz) or 1
+        thin = 0.5 * max(abs(ux), abs(uz)) / n_ / BPM; m = (s_ / BPM) % STALL_W
+        return dist, c, s_, min(m, STALL_W - m) < thin
+    LINE = f'GENERATED stall line (not observed): {STALL_W} m x {STALL_D} m stalls at 90 deg to aisle'
+    def parking(x, z):
+        P_ = Point(x + 0.5, z + 0.5); lot = next((f for f, pg in lot_mc if pg.contains(P_)), None)
+        if lot is None:
+            b = stall(P_, orphan) if orphan else None
+            if b is None: return None
+            if b[3]: return (WHITE, 'parking-stripe', b[1]['id'], f'{LINE} {b[1]["id"]} in an INFERRED lot (ESTIMATE)')
+            return (pave(x, z), 'parking-inferred', b[1]['id'], f'INFERRED parking surface (not mapped): one stall depth ({STALL_D} m) beside parking aisle {b[1]["id"]}, which has no amenity=parking outline in OSM')
+        b = stall(P_, aisles)
+        if b and b[3]: return (WHITE, 'parking-stripe', lot['id'], f'{LINE} {b[1]["id"]} (ESTIMATE)')
         return (pave(x, z), 'parking', lot['id'], 'mapped parking lot surface (amenity=parking, measured boundary)')
     cells, counts = [], {}
     def inb(x, z): return any(b.contains(Point(x + 0.5, z + 0.5)) for b in bld_mc)

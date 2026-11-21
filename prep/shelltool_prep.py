@@ -31,7 +31,7 @@ PIERS = '--piers' in a                                                          
 RECOMPUTE = '--recompute-accepted' in a
 for d in ('chunks', 'buildings', 'osm', 'roads', 'ept', 'overpass', 'crossings'): os.makedirs(os.path.join(CACHE, d), exist_ok=True)
 MAN = os.path.join(CACHE, 'chunks', f'{CX}_{CZ}.json')
-VERSION = 'shelltool_prep v4.4'          # plugin re-prepares chunks whose manifest pipeline differs (cache invalidation)
+VERSION = 'shelltool_prep v4.5'          # plugin re-prepares chunks whose manifest pipeline differs (cache invalidation)
 INDEX = r'C:\BTE-Migration\shelltool\osm-extract\clark_osm_index_v2.sqlite'   # v2 adds amenity=parking areas (v0.7)
 WALL, ROOF, PARTLINE, UNRESOLVED = 'minecraft:stone', 'minecraft:light_gray_wool', 'minecraft:stone', 'minecraft:orange_wool'
 DATASETS = [('NV_ClarkCo_2_B22', 2022), ('NV_ClarkCo_1_B22', 2022), ('NV_ClarkCounty_B1_2018', 2018), ('NV_LasVegasValley_2010', 2010)]

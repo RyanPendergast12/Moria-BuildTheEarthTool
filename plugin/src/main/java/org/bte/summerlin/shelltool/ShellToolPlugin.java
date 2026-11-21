@@ -62,7 +62,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     static final Set<String> OV_ROLES = Set.of("deck", "deck-soffit", "parapet", "median", "abutment", "pier", "approach-fill", "approach-wall", "approach-surface", "approach-barrier", "retire");
     static final Set<String> OV_WALL_ROLES = Set.of("abutment", "pier", "approach-fill", "approach-wall");            // built top-down to the real ground
     /** derived plans from any other preparation pipeline are re-prepared (old cached geometry cannot hide fixes) */
-    static final String PIPELINE = "shelltool_prep v4.4";
+    static final String PIPELINE = "shelltool_prep v4.5";
     static String contentOf(Seg s) { return s.mode() == 'R' ? (s.role().startsWith("parking") ? "parking" : "roads") : OV_ROLES.contains(s.role()) ? "overpass" : "shells"; }
 
     private double[] stripPoly, coverPoly;

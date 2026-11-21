@@ -1,5 +1,5 @@
 name: SummerlinShellTool
-version: 0.7.0
+version: 0.7.1
 main: org.bte.summerlin.shelltool.ShellToolPlugin
 api-version: 1.18
 description: Snowball-triggered, chunk-bounded generation of building shells (air only) and roads (provenance-checked surface replacement) from local OSM + LiDAR data; Strip excluded.

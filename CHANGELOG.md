@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.7.0 (2026-11-20, approved in-game): parking lots in the snowball tool (current version)
+## v0.7.1 (2026-11-21): Facade stall fix, inferred parking lots (current version)
+- **Facade: large whole-building jobs no longer stall.** In v0.7.0 a whole preview, apply or undo of a large building (Red Rock: 529 chunks, ~200k blocks) could wait 60 s per component for the entities of neighbouring chunks that were only loaded through a held chunk's ticket, so the job took hours. The sliding chunk window now also holds those neighbour ("ring") chunks with the plugin ticket when holding them cannot cause generation (all chunks within 2 already generated), so their entities load. Still at most `facade-max-loaded-chunks` (64) held. Red Rock on the test server: preview 37 s, apply 36 s, undo of 198,145 blocks 34 s, max job tick 6.4 ms.
+- A component that still waits 5 s for chunk entities logs one line naming each chunk's state, so a recurrence is diagnosable.
+- **INFERRED parking lots.** A `service=parking_aisle` way that lies outside every mapped `amenity=parking` area (common in Las Vegas: aisles mapped, lot outline not) now gets one stall depth (5.5 m) of lot surface on each side, between its ends, with GENERATED stall lines. Role `parking-inferred`, labelled INFERRED (not mapped) in the cell label and report. Aisles inside a mapped lot still use only the measured boundary; buildings, roads, sidewalks and crossings still win.
+- **Prep pipeline** `shelltool_prep v4.5`: chunks prepared by v4.4 are re-prepared once.
+- `prep/test_parking.py` covers the inferred lot (one stall depth only, labelled, never inferred when a mapped lot exists).
+
+## v0.7.0 (2026-11-20, approved in-game): parking lots in the snowball tool
 Includes the v0.6.0 Facade tool (below), released here for the first time.
 - **Parking lots** are generated with the roads (`/shelltool content roads` or `both`) and reported on their own `parking` line in chat and in the job report.
   - **Lot surface:** mapped `amenity=parking` areas with `parking=surface` (or no `parking` tag), paved with the road asphalt. Street-side, lay-by, lane, underground, covered and layered parking is reported as unsupported, not built.

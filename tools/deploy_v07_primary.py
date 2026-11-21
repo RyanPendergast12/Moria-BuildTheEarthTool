@@ -1,19 +1,18 @@
-"""deploy_v07_primary.py deploy|rollback|hashes - SummerlinShellTool 0.7.0 (parking lots + Facade) for the PRIMARY server (06-summerlin-pilot-server, port 25566) ONLY.
+"""deploy_v07_primary.py deploy|rollback|hashes - SummerlinShellTool 0.7.x (current: 0.7.1; parking lots + Facade) for the PRIMARY server (06-summerlin-pilot-server, port 25566) ONLY.
 Run only after the user approved the v0.7 in-game result. Refuses while the server runs or if its last session did not stop cleanly.
-deploy  : backs up the current JAR, the whole plugin data folder and the worlds to shelltool\\deploy-backups\\<time>-primary-pre-0.7.0;
-          freezes this release's prep scripts, assets and design packages in shelltool\\releases\\v0.7.0 (hash-checked against PREP_SHA);
-          installs the approved JAR (hash-checked); points Snowball's prep-script at the frozen v0.7.0 prep (pipeline v4.4, parking; needs
+deploy  : backs up the current JAR, the whole plugin data folder and the worlds to shelltool\\deploy-backups\\<time>-primary-pre-<VER>;
+          freezes this release's prep scripts, assets and design packages in shelltool\\releases\\v<VER> (hash-checked against PREP_SHA);
+          installs the approved JAR (hash-checked); points Snowball's prep-script and the Facade prep/packages at the frozen release (0.7.1: pipeline v4.5, inferred lots; needs
           osm-extract\\clark_osm_index_v2.sqlite); Egg keeps its frozen v0.5.0 prep; adds only missing facade-* keys. Ledger, tracked edits, caches and builds are kept; the world is not modified.
-rollback: restores the previous JAR and config from the newest primary pre-0.7 backup (ledger kept; parking/Facade jobs stay in it and stay
-          undoable once 0.7.0 is reinstalled). World backups are restored by hand only."""
+rollback: restores the previous JAR and config from the newest primary pre-<VER> backup (for 0.7.1: back to 0.7.0; ledger kept). World backups are restored by hand only."""
 import glob, hashlib, os, re, shutil, socket, sys, time
 SRV = r'C:\BTE-Migration\06-summerlin-pilot-server'; PORT = 25566
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = '0.7.0'
+VER = '0.7.1'
 JAR = os.path.join(REPO, 'plugin', 'build', f'SummerlinShellTool-{VER}.jar')
-JAR_SHA = 'd617e7efff1d9d8effca9a82e7dac5912ada56505022b91fa5297b01b16e0c64'                     # sha256 of the build the user approved in-game; None = refuse
-PREP_SHA = 'e983e338a775e14aa820db23912d05c03a96fe88c2eb73ccbc39d5910c51e746'                    # tree hash (tree_sha below) of prep/ + packages/ the user approved; None = refuse
-REL = r'C:\BTE-Migration\shelltool\releases\v0.7.0'; BK = r'C:\BTE-Migration\shelltool\deploy-backups'
+JAR_SHA = '70feb3e9b4a6cee7b1b5eb2f935f0ff9c4aa0dd26f7db979bbcfec6eee72f6e5'                     # sha256 of the build the user approved in-game; None = refuse
+PREP_SHA = 'c77d40fd82a7f3c7e4b8521eb5a4f2fab41932363cc1b40ecb43f6a08c852a15'                    # tree hash (tree_sha below) of prep/ + packages/ the user approved; None = refuse
+REL = r'C:\BTE-Migration\shelltool\releases\v' + VER; BK = r'C:\BTE-Migration\shelltool\deploy-backups'
 PL = os.path.join(SRV, 'plugins'); PD = os.path.join(PL, 'SummerlinShellTool')
 assert os.path.basename(SRV) == '06-summerlin-pilot-server'
 INDEX_V2 = r'C:\BTE-Migration\shelltool\osm-extract\clark_osm_index_v2.sqlite'
@@ -58,12 +57,12 @@ with socket.socket() as s:
 try: open(os.path.join(SRV, 'world', 'session.lock'), 'a').close()
 except PermissionError: refuse('the world is locked by a running server.')
 log = open(os.path.join(SRV, 'logs', 'latest.log'), encoding='utf-8', errors='replace').read()
-last = log[log.rfind('Starting minecraft server'):]
+i = log.rfind('Starting minecraft server'); last = log[i:] if i >= 0 else log   # the log rolls at midnight: no start line in it
 if 'Stopping server' not in last or 'All dimensions are saved' not in last: refuse('the last session did not stop cleanly. Start it, type "stop", wait for "All dimensions are saved", then deploy.')
 
 mode = sys.argv[1] if len(sys.argv) > 1 else 'deploy'
 if mode == 'deploy':
-    if JAR_SHA is None or PREP_SHA is None: refuse('no approved build pinned (JAR_SHA/PREP_SHA). Deploy only after the in-game approval of v0.7.')
+    if JAR_SHA is None or PREP_SHA is None: refuse(f'no approved build pinned (JAR_SHA/PREP_SHA). Deploy only after approval of v{VER}.')
     if not os.path.exists(INDEX_V2): refuse(f'{INDEX_V2} is missing (build it with prep/osm_index_build.py; see CHANGELOG v0.7.0).')
     if not os.path.exists(JAR) or hashlib.sha256(open(JAR, 'rb').read()).hexdigest() != JAR_SHA: refuse(f'{JAR} is missing or is not the approved build.')
     if tree_sha('prep', 'packages') != PREP_SHA: refuse('prep/ or packages/ differ from the approved state.')
@@ -83,18 +82,21 @@ if mode == 'deploy':
         refuse('the installed JAR does not match the approved hash after copying; restore from ' + b)
     cfg = open(os.path.join(PD, 'config.yml'), encoding='utf-8').read()
     cfg = re.sub(r'(?m)^prep-script: .*$', lambda m: 'prep-script: ' + os.path.join(REL, 'prep', 'shelltool_prep.py'), cfg)
+    cfg = re.sub(r'(?m)^facade-prep-script: .*$', lambda m: 'facade-prep-script: ' + os.path.join(REL, 'prep', 'facade_prep.py'), cfg)
+    cfg = re.sub(r'(?m)^facade-packages-dir: .*$', lambda m: 'facade-packages-dir: ' + os.path.join(REL, 'packages'), cfg)
     for k, v, comment in FACADE_KEYS:
         if not re.search(rf'^{k}:', cfg, re.M): cfg = cfg.rstrip('\n') + '\n' + (f'# {comment}\n' if comment else '') + f'{k}: {v}\n'
     open(os.path.join(PD, 'config.yml'), 'w', encoding='utf-8').write(cfg)
     print(f'Installed SummerlinShellTool {VER} (parking + Facade). Frozen prep + packages:', REL)
     print(f'Start the server; the log should show "Enabling SummerlinShellTool v{VER}", "Egg tool enabled" and the Facade line.')
 else:
-    # newest pre-0.7 backup that really holds an older JAR (a second 0.7.0 deploy makes a backup holding 0.7.0 itself)
-    bs = [x for x in sorted(glob.glob(os.path.join(BK, '*-primary-pre-0.7.*')))
-          if any(not os.path.basename(j).startswith('SummerlinShellTool-0.7') for j in glob.glob(os.path.join(x, 'SummerlinShellTool-*.jar')))]
-    if not bs: refuse('no primary backup holding a pre-0.7 JAR to roll back to. Nothing was changed.')
+    # newest pre-VER backup that really holds an older JAR (a second VER deploy makes a backup holding VER itself)
+    me = f'SummerlinShellTool-{VER}'
+    bs = [x for x in sorted(glob.glob(os.path.join(BK, f'*-primary-pre-{VER}')))
+          if any(not os.path.basename(j).startswith(me) for j in glob.glob(os.path.join(x, 'SummerlinShellTool-*.jar')))]
+    if not bs: refuse(f'no primary backup holding a pre-{VER} JAR to roll back to. Nothing was changed.')
     b = bs[-1]
-    old = [j for j in glob.glob(os.path.join(b, 'SummerlinShellTool-*.jar')) if not os.path.basename(j).startswith('SummerlinShellTool-0.7')]
+    old = [j for j in glob.glob(os.path.join(b, 'SummerlinShellTool-*.jar')) if not os.path.basename(j).startswith(me)]
     if not old or not os.path.exists(os.path.join(b, 'SummerlinShellTool', 'config.yml')): refuse(f'backup {b} is incomplete. Nothing was changed.')
     for j in glob.glob(os.path.join(PL, 'SummerlinShellTool-*.jar')): os.remove(j)
     for j in old: shutil.copy2(j, PL)

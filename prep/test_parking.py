@@ -34,6 +34,18 @@ def run():
     assert all(z >= 2 for x, z in by['parking']), 'lot cells inside the mapped boundary only'
     assert any(u['id'] == 'w2' for u in r['unsupported']), 'non-surface parking is reported, not generated'
     print('parking ok', {k: len(v) for k, v in by.items()})
+    # v0.7.1: an aisle with no lot outline -> INFERRED lot one stall depth each side; ground beyond that and past its ends stays untouched
+    r = R.chunk_roads(0, 0, Geo(), [aisle], ov, dict(proj={}, EY={}), approach=False)
+    by = {}
+    for x, z, y, blk, role, fid, lab in r['cells']: by.setdefault(role, []).append((x, z))
+    assert set(by) == {'parking-inferred', 'parking-aisle', 'parking-stripe'}, by.keys()
+    assert all(3.6 < abs(z + 0.5 - 12) <= 3.6 + R.STALL_D for x, z in by['parking-inferred'] + by['parking-stripe']), 'one stall depth only'
+    assert any('INFERRED' in c[6] for c in r['cells'] if c[4] == 'parking-inferred'), 'labelled INFERRED'
+    assert not any(z + 0.5 < 12 - 3.6 - R.STALL_D - 0.01 for x, z in by['parking-inferred']), 'nothing beyond one stall depth'
+    # an aisle inside a mapped lot is never extended past that lot's measured boundary
+    r = R.chunk_roads(0, 0, Geo(), [lot, aisle], ov, dict(proj={}, EY={}), approach=False)
+    assert not any(c[4] == 'parking-inferred' for c in r['cells']), 'mapped lot: no inference'
+    print('inferred lot ok', {k: len(v) for k, v in by.items()})
 
 
 if __name__ == '__main__':

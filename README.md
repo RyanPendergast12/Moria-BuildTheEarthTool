@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.7.0 (alpha): parking lots in the snowball tool, plus the Facade tool for building exteriors.** Download `SummerlinShellTool-0.7.0.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.7.0). It was approved in-game on 2026-11-20. Snowball now paves mapped surface parking lots and aisles and generates stall lines; the Facade tool (`/facadetool`) adds ASSISTED facades from aligned photos with person-drawn zones. Egg is unchanged. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.7.1 (alpha): parking lots (mapped and INFERRED) in the snowball tool, plus the Facade tool for building exteriors.** Download `SummerlinShellTool-0.7.1.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.7.1). v0.7.1 fixes large Facade jobs stalling (Red Rock now previews, applies and undoes in about 35 s) and paves an INFERRED lot beside parking aisles that have no mapped lot outline. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.

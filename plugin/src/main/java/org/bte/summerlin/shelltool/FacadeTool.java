@@ -223,7 +223,7 @@ final class FacadeTool implements Listener, TabExecutor {
     /** chunk window entry of one job: refs = window items needing it; PASSIVE = counted, never ticketed by this job (a ring chunk: loaded
      *  through its held neighbour's ticket; or an own chunk that cannot be held: edge / not generated) */
     static final byte W_PASSIVE = 0, W_WANT = 1, W_LOADING = 2, W_HELD = 3;
-    static final class WC { int refs; byte st = W_PASSIVE; boolean own; Chunk c; }
+    static final class WC { int refs; byte st = W_PASSIVE; boolean own, ringTried; Chunk c; }
     /** one window item's chunks: k[0..own) the cells' own chunks, then their 4-neighbour ring; k == null: oversized (own = chunks needed) */
     record Need(long[] k, int own) {}
     static String str(JsonObject o, String k) { return o != null && o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : null; }
@@ -805,7 +805,7 @@ final class FacadeTool implements Listener, TabExecutor {
             File wf = w.getWorldFolder(); Plan p0 = plan; int[] wk = work.trim(); List<Object[]> rt = new ArrayList<>(retire), cd = cands; List<Placement> up = ups;
             Bukkit.getScheduler().runTaskAsynchronously(pl, () -> safe(() -> {      // region-file reads and sorting off the main thread
                 Map<Long, Boolean> full = new HashMap<>();
-                for (long k : ks) for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                for (long k : ks) for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {     // +-3: ring chunks (+-1) are held too (interior: +-2)
                     long n = key(cxOf(k) + dx, czOf(k) + dz);
                     if (!full.containsKey(n)) full.put(n, !EggTool.offsetAbsent(wf, cxOf(k) + dx, czOf(k) + dz) && EggTool.diskFull(wf, cxOf(k) + dx, czOf(k) + dz));
                 }
@@ -872,7 +872,10 @@ final class FacadeTool implements Listener, TabExecutor {
                     int add = 0; for (long k : nx.k()) if (!win.containsKey(k)) add++;
                     if (win.size() + add > maxLoaded) break;                     // full: admitted once earlier items finish and release
                     for (int i = 0; i < nx.k().length; i++) { long k = nx.k()[i]; WC e = win.computeIfAbsent(k, q -> new WC()); e.refs++;
-                        if (i < nx.own() && !e.own) { e.own = true; if (e.st == W_PASSIVE && !edge.contains(k) && !ungen.contains(k)) e.st = W_WANT; } }
+                        if (i < nx.own() && !e.own) { e.own = true; if (e.st == W_PASSIVE && !edge.contains(k) && !ungen.contains(k)) e.st = W_WANT; }
+                        // v0.7.1: ring chunks are held too (when holding them cannot generate anything): their entities must load for the
+                        // per-cell checks, and a ring chunk only loaded through a neighbour's ticket was seen to never load them (v0.7.0 stall)
+                        else if (i >= nx.own() && e.st == W_PASSIVE && !e.ringTried) { e.ringTried = true; if (!ungen.contains(k) && interior(k)) e.st = W_WANT; } }
                 }
                 wq.add(nx); nx = null; pf++;
             }
@@ -903,6 +906,11 @@ final class FacadeTool implements Listener, TabExecutor {
                 else if (w.isChunkLoaded(cxOf(k), czOf(k))) ok &= w.getChunkAt(cxOf(k), czOf(k)).isEntitiesLoaded();
                 else if (i >= n.own() && diskFull.getOrDefault(k, false)) ok = false;   // ring: loads through its held neighbour's ticket
             }
+            if (!ok && fwait == 100) { StringBuilder sb = new StringBuilder("facade job " + id + " waiting 5 s for chunk entities, item " + gi + ":");   // diagnosis if a stall recurs
+                for (int i = 0; i < n.k().length; i++) { long k = n.k()[i]; WC e = win.get(k); boolean ld = w.isChunkLoaded(cxOf(k), czOf(k));
+                    sb.append(' ').append(cxOf(k)).append(',').append(czOf(k)).append(i < n.own() ? "/own" : "/ring").append(" st=").append(e == null ? -1 : e.st)
+                      .append(" loaded=").append(ld).append(" ent=").append(ld && w.getChunkAt(cxOf(k), czOf(k)).isEntitiesLoaded()).append(" disk=").append(diskFull.get(k)); }
+                pl.getLogger().info(sb.toString()); }
             if (ok || ++fwait > 1200) { fwait = 0; return true; }
             return false;
         }
