@@ -8,7 +8,7 @@ A Paper server plugin for [BuildTheEarth](https://buildtheearth.net) builders. T
 
 The tool lays down accurate shells and roads, and builders then do the detailing by hand. It is not meant to replace builders.
 
-> **Current version: v0.7.1 (alpha): parking lots (mapped and INFERRED) in the snowball tool, plus the Facade tool for building exteriors.** Download `SummerlinShellTool-0.7.1.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.7.1). v0.7.1 fixes large Facade jobs stalling (Red Rock now previews, applies and undoes in about 35 s) and paves an INFERRED lot beside parking aisles that have no mapped lot outline. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> **Current version: v0.8.0 (alpha): area mode.** Select a rectangle with `/shelltool area pos1` / `pos2`, then one preview, one apply and one undo build shells, roads, parking and overpasses for up to 1,024 chunks. Download `SummerlinShellTool-0.8.0.jar` from [Releases](https://github.com/RyanPendergast12/Moria-BuildTheEarthTool/releases/tag/v0.8.0). Also includes the Facade tool and Egg. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 > It is tested on the Las Vegas server it was built for: Clark County, Nevada, Paper 1.18.2 and TerraPlusMinus. That includes in-game tests of the snowball workflow and the connected overpass.
 > Several paths and region settings are still hard-coded for that setup. Running it for another city needs the portability work in [docs/ROADMAP.md](docs/ROADMAP.md).
 > [docs/SETUP.md](docs/SETUP.md) tells you exactly what to change in the meantime.
@@ -54,6 +54,13 @@ snowball hits block ──► plugin (Java, server thread: checks, placement, un
 | `/shelltool status` | Mode, jobs, queue and coverage at your location. |
 | `/shelltool cancel` | Cancel your running and queued work. |
 | `/shelltool undo [job] [confirm]` | Dry run, then restore. |
+| `/shelltool area pos1` / `pos2` [x z] | **Area mode (v0.8).** Marks the two opposite corners of a rectangle (where you stand, or the given block x z). The reply shows its size in chunks. |
+| `/shelltool area preview [shells\|roads\|both]` | Runs the ordinary chunk job as a preview for every chunk of the area (prepares missing data first) and prints one summary. Nothing is placed. Content defaults to your `/shelltool content`. |
+| `/shelltool area apply confirm [content]` | Builds the whole area. Needs your completed area preview of exactly this area and content within the last 30 minutes. |
+| `/shelltool area status` / `cancel` | Progress (every 30 s in chat too) / stop starting new chunks; running chunk jobs finish. |
+| `/shelltool area resume <id>` | Continues a cancelled or interrupted (server restart) area apply; finished chunks are skipped. Nothing resumes on its own. |
+| `/shelltool area undo <id> [confirm]` | Dry run, then restores every chunk job of the area, newest first (same exact undo as one chunk). |
+| `/shelltool area list` | Your last 10 areas. Reports: `plugins/SummerlinShellTool/areas/<id>.json` and `<id>.chunks.jsonl`. |
 | `/shelltool content overpass` | **Specialist/debug mode.** Builds ONLY eligible crossings; no ordinary roads or shells. For normal building use `roads` or `both`, which already include enabled crossings. |
 
 **Permissions:**

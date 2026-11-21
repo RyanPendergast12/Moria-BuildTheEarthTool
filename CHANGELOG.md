@@ -1,6 +1,18 @@
 # Changelog
 
-## v0.7.1 (2026-11-21): Facade stall fix, inferred parking lots (current version)
+## v0.8.0 (2026-11-21): area mode (current version)
+- **`/shelltool area`**: one preview, one apply and one undo for a rectangle of chunks (two corners, `pos1`/`pos2`). Up to `area-max-chunks` (default 1024) chunks.
+  - Each chunk runs the ordinary Snowball chunk job (same preparation, writer, protection, ledger, exact undo and tick limits as a throw), at most `area-parallel-jobs` (default 2, always one slot left for players) at a time, in serpentine order. Preparation of the next chunks is queued ahead.
+  - Chat: one start line, progress every 30 s (chunks done, blocks so far, time left) and one summary; no per-chunk messages.
+  - **Apply needs a completed area preview** of exactly that area and content by the same person within 30 minutes.
+  - Strip chunks are skipped; a chunk another tool or job holds for over 2 minutes is skipped and reported.
+  - Every chunk job id is appended to `areas/<id>.chunks.jsonl`: **`area undo <id>`** undoes them newest first (dry run first); **`area resume <id>`** continues a cancelled or interrupted apply. Nothing restarts on its own after a restart.
+- The area never generates terrain: chunks that were never generated are skipped and reported (one such chunk hung an area test in rc1). A chunk job stuck for 3 minutes in planning/placing is stopped by the area watchdog and reported; an area preview with stopped jobs does not open the apply gate.
+- Snowball chunk jobs no longer hang silently: a failed chunk load or an error while starting placement is logged and ends the job with a note (before, the async chunk load swallowed it).
+- Tested on 2one5 (server 13): 1,020-chunk area, first preview 88 min (preparing every chunk), later previews and the apply about 2 min each; cancel + resume; area undo restored all 158,156 blocks exactly.
+- Chunk jobs gained a quiet mode, an owner and a completion hook; undo gained a quiet callback form (used by the area; the plain commands are unchanged).
+
+## v0.7.1 (2026-11-21): Facade stall fix, inferred parking lots
 - **Facade: large whole-building jobs no longer stall.** In v0.7.0 a whole preview, apply or undo of a large building (Red Rock: 529 chunks, ~200k blocks) could wait 60 s per component for the entities of neighbouring chunks that were only loaded through a held chunk's ticket, so the job took hours. The sliding chunk window now also holds those neighbour ("ring") chunks with the plugin ticket when holding them cannot cause generation (all chunks within 2 already generated), so their entities load. Still at most `facade-max-loaded-chunks` (64) held. Red Rock on the test server: preview 37 s, apply 36 s, undo of 198,145 blocks 34 s, max job tick 6.4 ms.
 - A component that still waits 5 s for chunk entities logs one line naming each chunk's state, so a recurrence is diagnosable.
 - **INFERRED parking lots.** A `service=parking_aisle` way that lies outside every mapped `amenity=parking` area (common in Las Vegas: aisles mapped, lot outline not) now gets one stall depth (5.5 m) of lot surface on each side, between its ends, with GENERATED stall lines. Role `parking-inferred`, labelled INFERRED (not mapped) in the cell label and report. Aisles inside a mapped lot still use only the measured boundary; buildings, roads, sidewalks and crossings still win.

@@ -1,16 +1,16 @@
-"""deploy_v07_primary.py deploy|rollback|hashes - SummerlinShellTool 0.7.x (current: 0.7.1; parking lots + Facade) for the PRIMARY server (06-summerlin-pilot-server, port 25566) ONLY.
+"""deploy_v07_primary.py deploy|rollback|hashes - SummerlinShellTool 0.7.x (current: 0.8.0; parking lots + Facade) for the PRIMARY server (06-summerlin-pilot-server, port 25566) ONLY.
 Run only after the user approved the v0.7 in-game result. Refuses while the server runs or if its last session did not stop cleanly.
 deploy  : backs up the current JAR, the whole plugin data folder and the worlds to shelltool\\deploy-backups\\<time>-primary-pre-<VER>;
           freezes this release's prep scripts, assets and design packages in shelltool\\releases\\v<VER> (hash-checked against PREP_SHA);
-          installs the approved JAR (hash-checked); points Snowball's prep-script and the Facade prep/packages at the frozen release (0.7.1: pipeline v4.5, inferred lots; needs
+          installs the approved JAR (hash-checked); points Snowball's prep-script and the Facade prep/packages at the frozen release (0.8.0: pipeline v4.5, unchanged prep; needs
           osm-extract\\clark_osm_index_v2.sqlite); Egg keeps its frozen v0.5.0 prep; adds only missing facade-* keys. Ledger, tracked edits, caches and builds are kept; the world is not modified.
-rollback: restores the previous JAR and config from the newest primary pre-<VER> backup (for 0.7.1: back to 0.7.0; ledger kept). World backups are restored by hand only."""
+rollback: restores the previous JAR and config from the newest primary pre-<VER> backup (for 0.8.0: back to 0.7.1; ledger kept). World backups are restored by hand only."""
 import glob, hashlib, os, re, shutil, socket, sys, time
 SRV = r'C:\BTE-Migration\06-summerlin-pilot-server'; PORT = 25566
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = '0.7.1'
+VER = '0.8.0'
 JAR = os.path.join(REPO, 'plugin', 'build', f'SummerlinShellTool-{VER}.jar')
-JAR_SHA = '70feb3e9b4a6cee7b1b5eb2f935f0ff9c4aa0dd26f7db979bbcfec6eee72f6e5'                     # sha256 of the build the user approved in-game; None = refuse
+JAR_SHA = 'aa613907973d02a77ab30fe34587036b9412f4a0e4d09fd38e19f1ee182f56b2'                     # sha256 of the build the user approved in-game; None = refuse
 PREP_SHA = 'c77d40fd82a7f3c7e4b8521eb5a4f2fab41932363cc1b40ecb43f6a08c852a15'                    # tree hash (tree_sha below) of prep/ + packages/ the user approved; None = refuse
 REL = r'C:\BTE-Migration\shelltool\releases\v' + VER; BK = r'C:\BTE-Migration\shelltool\deploy-backups'
 PL = os.path.join(SRV, 'plugins'); PD = os.path.join(PL, 'SummerlinShellTool')

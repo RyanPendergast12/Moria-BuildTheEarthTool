@@ -71,12 +71,12 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     final Set<Long> pilotRoads = new HashSet<>(); final Set<Long> tracked = ConcurrentHashMap.newKeySet();
     volatile boolean loaded;
     String worldName, prepPython, prepScript; File cacheDir;
-    private int blocksPerTick, maxJobs, applyDelayTicks, maxPrepQueue, prepTimeoutS, prepWorkers, maxPrepareRadius, prefetchRadius;
+    int maxJobs, maxPrepQueue; private int blocksPerTick, applyDelayTicks, prepTimeoutS, prepWorkers, maxPrepareRadius, prefetchRadius;
     private long cooldownMs; private double placeMsPerTick;
     private boolean overpassEnabled, overpassPiers; private double approachGrade; private String overpassMode = "auto"; private List<String> overpassExclude = List.of(); private int minClearance = 4; private List<String> overpassCrossings = List.of();
     private final Set<UUID> allowed = new HashSet<>();
     private final Map<UUID, Mode> modes = new HashMap<>();
-    private final Map<UUID, Content> contents = new HashMap<>();
+    final Map<UUID, Content> contents = new HashMap<>();
     private final Set<UUID> prefetchOn = new HashSet<>();
     private final Map<UUID, Long> lastThrow = new HashMap<>();
     final Map<Long, Job> activeChunks = new HashMap<>();
@@ -88,7 +88,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     // v0.5 Egg / v0.6 Facade hooks (main thread only): chunk key -> job holding it (Egg job id, or "facade:<job>"; Snowball submit/undo refuse these); ids of Egg / Facade jobs
     final Map<Long, String> regionLocks = new HashMap<>();
     final Set<String> eggJobs = new HashSet<>(), facadeJobs = new HashSet<>();
-    EggTool egg; FacadeTool facade;
+    EggTool egg; FacadeTool facade; AreaTool area;
     /** who holds a region lock, for refusal messages */
     /** the plugin's chunk ticket is one per chunk for Snowball, Egg and Facade alike: reference-counted (main thread) so one tool
      *  releasing its hold never drops a ticket another tool still needs */
@@ -153,6 +153,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         } catch (IOException e) { getLogger().severe("ledger/tracking unavailable, disabling: " + e); getServer().getPluginManager().disablePlugin(this); return; }
         for (int i = 0; i < prepWorkers; i++) { Thread t = new Thread(this::prepWorker, "ShellTool-prep-" + i); t.setDaemon(true); t.start(); workers.add(t); }
         egg = new EggTool(this); getServer().getPluginManager().registerEvents(egg, this); getCommand("eggtool").setExecutor(egg); getCommand("eggtool").setTabCompleter(egg);
+        area = new AreaTool(this);
         facade = new FacadeTool(this); getServer().getPluginManager().registerEvents(facade, this); getCommand("facadetool").setExecutor(facade); getCommand("facadetool").setTabCompleter(facade);
         File data = new File(getDataFolder(), getConfig().getString("data-file", "shells.txt"));
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
@@ -162,6 +163,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     }
     @Override public void onDisable() {
         stopping = true;
+        if (area != null) area.stop();
         if (facade != null) facade.stop();
         if (egg != null) egg.stop();
         for (Job j : new ArrayList<>(activeChunks.values())) j.cancel("server stopping");
@@ -458,11 +460,17 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         if (regionLocks.containsKey(k)) { who.sendMessage("§e[ShellTool] " + lockHolder(k) + " is working on this chunk (" + cx + "," + cz + "). Try again after it finishes."); return; }
         if (activeChunks.containsKey(k)) { who.sendMessage("§e[ShellTool] A job is already running for chunk " + cx + "," + cz + "."); return; }
         if (activeChunks.size() >= maxJobs) { who.sendMessage("§e[ShellTool] Queue full (" + maxJobs + " active jobs)."); return; }
+        launch(who, w, x, y, z, mode, content, who instanceof Player p ? p.getUniqueId() : null, false, null);
+    }
+    /** start a chunk job; the caller has done submit()'s checks. quiet: no chat (area children); onDone runs on the main thread after its report */
+    Job launch(CommandSender who, World w, int x, int y, int z, Mode mode, Content content, UUID owner, boolean quiet, java.util.function.Consumer<Job> onDone) {
+        int cx = x >> 4, cz = z >> 4;
         String id = String.format("%tY%<tm%<td-%<tH%<tM%<tS-%d", new Date(), seq.incrementAndGet());
-        Job j = new Job(id, who, w, x, y, z, cx, cz, mode, content); activeChunks.put(k, j);
-        who.sendMessage("§b[ShellTool] Job " + id + " (" + mode + ", " + content.arg() + "): impact block " + x + " " + y + " " + z + " -> chunk " + cx + "," + cz
+        Job j = new Job(id, who, w, x, y, z, cx, cz, mode, content); j.owner = owner; j.quiet = quiet; j.onDone = onDone; activeChunks.put(key(cx, cz), j);
+        j.tell("§b[ShellTool] Job " + id + " (" + mode + ", " + content.arg() + "): impact block " + x + " " + y + " " + z + " -> chunk " + cx + "," + cz
                 + " (blocks x " + (cx << 4) + ".." + ((cx << 4) + 15) + ", z " + (cz << 4) + ".." + ((cz << 4) + 15) + ")");
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> j.prepareOrLoad(0));
+        return j;
     }
     private void msg(CommandSender s, String text) { Bukkit.getScheduler().runTask(this, () -> s.sendMessage(text)); }
 
@@ -482,6 +490,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         int[] bc(Seg s) { return byContent.computeIfAbsent(contentOf(s), k -> new int[4]); }
         void pres(Seg s, int[] pf) { present++; pf[2]++; bc(s)[1]++; }
         BukkitTask task; Chunk chunk; volatile boolean done;
+        UUID owner; boolean quiet; java.util.function.Consumer<Job> onDone; volatile long stageSince;      // v0.8 area children: owner for the ledger, no chat, completion hook
+        void tell(String m) { if (!quiet) msg(who, m); }
         Job(String id, CommandSender who, World w, int ix, int iy, int iz, int cx, int cz, Mode mode, Content content) {
             this.id = id; this.who = who; this.w = w; this.ix = ix; this.iy = iy; this.iz = iz; this.cx = cx; this.cz = cz; this.mode = mode; this.content = content;
         }
@@ -491,21 +501,21 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             JsonObject m = readManifest(cx, cz); Content need = missing(m, content);
             if (need != null && attempt > 0 && m != null && (!content.shells() || m.has("shells")) && (!content.roads() || m.has("roads")) && (!ovOn(content) || m.has("overpass"))) need = null;  // prepared once: report its result (incl. failures), no re-fetch loop
             if (need != null && attempt < 2) {
-                PrepTask t = requestPrep(cx, cz, need, 0, who instanceof Player p ? p.getUniqueId() : null);
+                PrepTask t = requestPrep(cx, cz, need, 0, owner);
                 if (t == null) { notes.add("Preparation refused (protected or queue full)."); Bukkit.getScheduler().runTask(ShellToolPlugin.this, this::finish); return; }
                 stage = "preparing";
-                msg(who, "§b[ShellTool] Chunk " + cx + "," + cz + ": " + (m == null ? "data NOT FETCHED YET" : "data incomplete/retry (" + need.arg() + ")")
+                tell("§b[ShellTool] Chunk " + cx + "," + cz + ": " + (m == null ? "data NOT FETCHED YET" : "data incomplete/retry (" + need.arg() + ")")
                         + " - preparing (queue position " + (t.running ? "running" : String.valueOf(1 + queuePos(t))) + "). The build continues automatically.");
                 long q0 = System.currentTimeMillis();
                 t.done.thenRun(() -> {
                     queueWaitMs += Math.max(0, (t.started > 0 ? t.started : System.currentTimeMillis()) - q0); prepMs += System.currentTimeMillis() - Math.max(q0, t.started);
                     if (t.cancelled || done) { if (!done) { notes.add("Preparation cancelled."); Bukkit.getScheduler().runTask(ShellToolPlugin.this, this::finish); } return; }
-                    msg(who, "§b[ShellTool] Chunk " + cx + "," + cz + " preparation finished (" + (System.currentTimeMillis() - q0) / 1000 + " s incl. queue).");
+                    tell("§b[ShellTool] Chunk " + cx + "," + cz + " preparation finished (" + (System.currentTimeMillis() - q0) / 1000 + " s incl. queue).");
                     prepareOrLoad(attempt + 1);
                 });
                 return;
             }
-            stage = "planning"; manifest = m;
+            stage = "planning"; stageSince = System.currentTimeMillis(); manifest = m;
             if (m == null) { notes.add("No prepared data (see cache prep-logs)."); Bukkit.getScheduler().runTask(ShellToolPlugin.this, this::finish); return; }
             if (content.roads()) loadRoads(m);                              // roads first: they only touch the surface, shells only air above it
             if (content.shells()) loadShells(m);
@@ -513,10 +523,14 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             for (Seg s : segs) perFeature.computeIfAbsent(s.feature(), f -> new int[4])[0]++;
             Runnable go = () -> Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {
                 if (segs.isEmpty()) { finish(); return; }
-                stage = "placing"; w.getChunkAtAsync(cx, cz).thenAccept(this::start);
+                stage = "placing"; stageSince = System.currentTimeMillis();
+                w.getChunkAtAsync(cx, cz).whenComplete((c, ex) -> Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {   // v0.8: never hang silently
+                    if (ex != null || c == null) { notes.add("chunk load failed: " + (ex != null ? ex : "no chunk")); getLogger().warning("job " + id + " chunk load failed: " + ex); finish(); return; }
+                    try { start(c); } catch (Throwable t) { notes.add("internal error: " + t); getLogger().log(java.util.logging.Level.SEVERE, "job " + id + " start failed", t); finish(); }
+                }));
             });
             if (crossFiles.isEmpty() || !ovOn(content)) { go.run(); return; }
-            stage = "crossing preflight";                    // all blocks of each crossing, in all its chunks, before any is placed
+            stage = "crossing preflight"; stageSince = System.currentTimeMillis();                   // all blocks of each crossing, in all its chunks, before any is placed
             Map<String, CompletableFuture<Preflight>> pf = new TreeMap<>();
             for (Map.Entry<String, String> e : crossFiles.entrySet()) pf.put(e.getKey(), preflight(e.getKey(), e.getValue()));
             CompletableFuture.allOf(pf.values().toArray(new CompletableFuture[0])).thenRun(() -> Bukkit.getScheduler().runTask(ShellToolPlugin.this, () -> {
@@ -649,7 +663,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             chunk = c; ticket(c);
             if (ovOn(content)) { precheckOverpass(); addRetirements(); if (segs.isEmpty()) { finish(); return; } }
             if (mode == Mode.APPLY) { JsonObject o = new JsonObject(); o.addProperty("type", "job"); o.addProperty("job", id);
-                String owner = who instanceof Player p ? p.getUniqueId().toString() : "console";
+                String owner = this.owner != null ? this.owner.toString() : "console";
                 o.addProperty("owner", owner); o.addProperty("world", w.getName()); o.addProperty("cx", cx); o.addProperty("cz", cz); o.addProperty("content", content.arg()); log(o); flush(); jobOwner.put(id, owner); }
             task = Bukkit.getScheduler().runTaskTimer(ShellToolPlugin.this, this::tick, Math.max(1, applyDelayTicks), 1);
         }
@@ -735,13 +749,14 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             if (mode == Mode.APPLY) flush();
             if (idx >= segs.size()) finish();
         }
-        void cancel(String why) { if (!done) { notes.add("Cancelled: " + why); who.sendMessage("§e[ShellTool] Job " + id + " cancelled: " + why + " (" + placed + " placed blocks are in the ledger and undoable)."); finish(); } }
+        void cancel(String why) { if (!done) { notes.add("Cancelled: " + why); tell("§e[ShellTool] Job " + id + " cancelled: " + why + " (" + placed + " placed blocks are in the ledger and undoable)."); finish(); } }
         void finish() {
             if (done) return; done = true; stage = "done";
             if (task != null) task.cancel();
             if (chunk != null) unticket(chunk);
             activeChunks.remove(key(cx, cz));
             report();
+            if (onDone != null) onDone.accept(this);
         }
         void report() {
             JsonObject r = new JsonObject(); r.addProperty("job", id); r.addProperty("mode", mode.toString()); r.addProperty("content", content.arg());
@@ -776,12 +791,12 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
                 sb.append(sb.length() == 0 ? "" : " | ").append(c).append(" ").append(st).append(": ").append(v[0]).append(mode == Mode.APPLY ? " placed" : " would place")
                   .append(", ").append(v[1]).append(" present, ").append(v[2]).append(" protected").append(v[3] > 0 ? ", " + v[3] + " upgraded" : "");
             }
-            who.sendMessage("§b[ShellTool] Job " + id + " DONE " + mode + " " + content.arg() + " chunk " + cx + "," + cz + " (prep " + prepMs / 1000 + " s)");
-            who.sendMessage("§b  " + sb);
+            tell("§b[ShellTool] Job " + id + " DONE " + mode + " " + content.arg() + " chunk " + cx + "," + cz + " (prep " + prepMs / 1000 + " s)");
+            tell("§b  " + sb);
             int nu = unsupported.size() + crossingUnresolved.size();
-            if (nu > 0) who.sendMessage("§6  " + nu + " unsupported/unresolved: " + shortWhy(!crossingUnresolved.isEmpty() ? crossingUnresolved.values().iterator().next() : unsupported.get(0)));
-            if (!skippedCrossings.isEmpty() && crossingUnresolved.isEmpty()) who.sendMessage("§7  bridge not generated: " + shortWhy(skippedCrossings.values().iterator().next()));
-            who.sendMessage("§7  Report: plugins/SummerlinShellTool/reports/job-" + id + ".json");
+            if (nu > 0) tell("§6  " + nu + " unsupported/unresolved: " + shortWhy(!crossingUnresolved.isEmpty() ? crossingUnresolved.values().iterator().next() : unsupported.get(0)));
+            if (!skippedCrossings.isEmpty() && crossingUnresolved.isEmpty()) tell("§7  bridge not generated: " + shortWhy(skippedCrossings.values().iterator().next()));
+            tell("§7  Report: plugins/SummerlinShellTool/reports/job-" + id + ".json");
             getLogger().info("job " + id + " " + gson.toJson(r));
         }
     }
@@ -853,7 +868,10 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     // ---------------------------------------------------------------- undo
     String toolOf(String job) { return eggJobs.contains(job) ? "egg" : facadeJobs.contains(job) ? "facade" : "shell"; }
     /** tool: "egg" = Egg jobs only (/eggtool undo), "facade" = Facade jobs only (/facadetool undo), "shell" = Snowball jobs only */
-    void undo(CommandSender s, String jobArg, boolean confirm, String tool) {
+    void undo(CommandSender s, String jobArg, boolean confirm, String tool) { undo(s, jobArg, confirm, tool, null); }
+    /** cb != null (area undo): no chat; cb gets (null, {restored-or-restorable, kept_modified}) or (refusal reason, null), on the main thread */
+    void undo(CommandSender s0, String jobArg, boolean confirm, String tool, java.util.function.BiConsumer<String, int[]> cb) {
+        CommandSender s = cb == null ? s0 : quietSender(s0, cb);
         boolean egg = tool.equals("egg");
         String owner = s instanceof Player p ? p.getUniqueId().toString() : null;
         String job = jobArg;
@@ -886,6 +904,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             }
             if (confirm) { JsonObject o = new JsonObject(); o.addProperty("type", "undo-done"); o.addProperty("job", jb); o.addProperty("restored", restored[0]); o.addProperty("kept_modified", modified[0]); if (egg) o.addProperty("kept_column", depKept[0]); log(o); flush(); undone.add(jb); }
             for (Chunk c : held) unticket(c);
+            if (cb != null) { cb.accept(null, new int[]{confirm ? restored[0] : restorable[0], modified[0]}); return; }
             s.sendMessage("§b[ShellTool] Undo " + (confirm ? "" : "DRY RUN ") + "job " + jb + ": " + ps.size() + " recorded placements, "
                     + (confirm ? "restored " + restored[0] : "would restore " + restorable[0]) + " to their exact before-state, kept (changed since placement) " + modified[0]
                     + (egg ? ", kept (later work depends on its column) " + depKept[0] : "")
@@ -894,6 +913,14 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
         List<CompletableFuture<Chunk>> fs = new ArrayList<>();
         for (long k : chunks) fs.add(w.getChunkAtAsync((int) (k >> 32), (int) k).thenApply(c -> { ticket(c); held.add(c); return c; }));
         CompletableFuture.allOf(fs.toArray(new CompletableFuture[0])).thenRun(() -> Bukkit.getScheduler().runTask(this, run));
+    }
+    /** a sender for the quiet undo: its permission checks are s's; any message is a refusal and goes to cb (once) instead of chat */
+    CommandSender quietSender(CommandSender s, java.util.function.BiConsumer<String, int[]> cb) {
+        boolean[] sent = {false};
+        return (CommandSender) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(), s instanceof Player ? new Class<?>[]{Player.class} : new Class<?>[]{CommandSender.class}, (pr, m, args) -> {
+            if (m.getName().equals("sendMessage")) { if (!sent[0]) { sent[0] = true; cb.accept(String.valueOf(args[0]).replaceAll("§.", ""), null); } return null; }
+            return m.invoke(s, args);
+        });
     }
     static <T> List<T> reversed(List<T> l) { List<T> r = new ArrayList<>(l); Collections.reverse(r); return r; }
 
@@ -941,6 +968,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             case "undo" -> { String job = null; boolean confirm = false;
                 for (int i = 1; i < a.length; i++) if (a[i].equalsIgnoreCase("confirm")) confirm = true; else job = a[i];
                 undo(s, job, confirm, "shell"); }
+            case "area" -> area.command(s, Arrays.copyOfRange(a, 1, a.length));
             case "sim" -> {
                 if (!s.hasPermission(ADMIN)) return say(s, "Admin only.");
                 if (a.length < 5) return say(s, "/shelltool sim <x> <y> <z> <preview|apply> [shells|roads|both]");
@@ -962,7 +990,7 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
                 Content pc = Content.valueOf(a[3].toUpperCase(Locale.ROOT)); if (pc.overpass() && !overpassEnabled) return say(s, "Overpass generation is disabled on this server.");
                 PrepTask t = requestPrep(Integer.parseInt(a[1]), Integer.parseInt(a[2]), pc, 1, null);
                 say(s, t == null ? "prepare refused (protected or queue full)" : "prepare queued for chunk " + a[1] + "," + a[2]); }
-            default -> say(s, "/shelltool on|off|preview|content <shells|roads|both>|prepare [radius]|prefetch <on|off>|status|cancel|undo [job] [confirm]");
+            default -> say(s, "/shelltool on|off|preview|content <shells|roads|both>|prepare [radius]|prefetch <on|off>|status|cancel|undo [job] [confirm]|area ...");
         }
         return true;
     }
@@ -974,7 +1002,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     }
     private boolean say(CommandSender s, String m) { s.sendMessage("§b[ShellTool] " + m); return true; }
     @Override public List<String> onTabComplete(CommandSender s, Command c, String l, String[] a) {
-        if (a.length == 1) return List.of("on", "off", "preview", "content", "prepare", "prefetch", "status", "cancel", "undo");
+        if (a.length == 1) return List.of("on", "off", "preview", "content", "prepare", "prefetch", "status", "cancel", "undo", "area");
+        if (a.length == 2 && a[0].equalsIgnoreCase("area")) return AreaTool.SUBS;
         if (a.length == 2 && a[0].equalsIgnoreCase("content")) return overpassEnabled ? List.of("shells", "roads", "both", "overpass") : List.of("shells", "roads", "both");
         if (a.length == 2 && a[0].equalsIgnoreCase("prefetch")) return List.of("on", "off");
         return List.of();
