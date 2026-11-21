@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.0 (unreleased): Facade tool for detailed exteriors and landmark design packages
+## v0.6.0 (unreleased; latest prerelease v0.6.0-rc5): Facade tool for detailed exteriors and landmark design packages
 - **New `/facadetool`** (inspect, select, preview, apply chunk or bounded whole, adopt, status, cancel, undo), separate from Snowball and Egg; no item binding.
 - **Design packages** (`facade-package-1`, `packages/<id>/`), validated as data only:
   - no code, aliases or paths outside the allowed roots;
