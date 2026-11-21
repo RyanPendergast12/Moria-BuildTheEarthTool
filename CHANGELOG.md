@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.7.0 (unreleased; in testing as v0.7.0-rc1): parking lots in the snowball tool
+- **Parking lots** are generated with the roads (`/shelltool content roads` or `both`) and reported on their own `parking` line in chat and in the job report.
+  - **Lot surface:** mapped `amenity=parking` areas with `parking=surface` (or no `parking` tag), paved with the road asphalt. Street-side, lay-by, lane, underground, covered and layered parking is reported as unsupported, not built.
+  - **Aisles:** `service=parking_aisle` ways, previously skipped by the pilot rule, are paved as unmarked 7.2 m service carriageways (width ESTIMATE). `drive-through` is still skipped.
+  - **Stall lines:** GENERATED, not observed (stalls are rarely mapped): white 1-block lines every 2.7 m, 5.5 m deep, at 90 degrees to the nearest aisle, inside the lot only.
+  - Same writer, protection, ledger and exact undo as roads. Buildings, roads, sidewalks and crossings win over parking.
+- **OSM index v2** (`clark_osm_index_v2.sqlite`) adds `amenity=parking` areas; the v1 index used by released versions is unchanged. The Overpass fallback also fetches parking.
+- **Prep pipeline** `shelltool_prep v4.4`: chunks prepared by v4.3 are re-prepared once.
+- `prep/test_parking.py`: offline check of lot, aisle and stall-line generation.
+- `tools/build_plugin.sh`: reproducible javac build of the JAR.
+
 ## v0.6.0 (unreleased; latest prerelease v0.6.0-rc5): Facade tool for detailed exteriors and landmark design packages
 - **New `/facadetool`** (inspect, select, preview, apply chunk or bounded whole, adopt, status, cancel, undo), separate from Snowball and Egg; no item binding.
 - **Design packages** (`facade-package-1`, `packages/<id>/`), validated as data only:

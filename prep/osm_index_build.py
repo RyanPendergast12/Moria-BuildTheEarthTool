@@ -1,6 +1,6 @@
 """osm_index_build.py <extract.osm.pbf> <provenance.json> <out.sqlite> [w,s,e,n]
 Builds the persistent local OSM index used by shelltool_prep.py: buildings, building:parts, highways (incl. mapped
-footways/sidewalks/crossings), area:highway surfaces, inside the Las Vegas valley coverage box. SQLite + R*Tree.
+footways/sidewalks/crossings), area:highway surfaces, amenity=parking areas (v2: not buildings), inside the Las Vegas valley coverage box. SQLite + R*Tree.
 Records the extract source/date/hash and the coverage box in table meta. Outside coverage -> prep falls back to Overpass."""
 import json, sqlite3, sys, time, os
 import osmium
@@ -17,7 +17,7 @@ db.executescript('''create table feat(id integer primary key, osm text, kind tex
 create virtual table feat_idx using rtree(id, minx, maxx, miny, maxy);
 create table meta(k text primary key, v text);''')
 def inside(b): return not (b[2] < COVER[0] or b[0] > COVER[2] or b[3] < COVER[1] or b[1] > COVER[3])
-rows = []; n = {'building': 0, 'building_part': 0, 'highway': 0, 'area_highway': 0}
+rows = []; n = {'building': 0, 'building_part': 0, 'highway': 0, 'area_highway': 0, 'parking': 0}
 def add(osm, kind, tags, g):
     b = g.bounds
     if not inside(b): return
@@ -38,7 +38,7 @@ class H(osmium.SimpleHandler):
             except Exception: pass
     def area(self, a):
         t = {k: v for k, v in a.tags}
-        kind = 'building' if t.get('building', 'no') != 'no' else 'building_part' if 'building:part' in t else 'area_highway' if 'area:highway' in t else None
+        kind = 'building' if t.get('building', 'no') != 'no' else 'building_part' if 'building:part' in t else 'area_highway' if 'area:highway' in t else 'parking' if t.get('amenity') == 'parking' else None
         if kind is None: return
         try: g = swkb.loads(fab.create_multipolygon(a), hex=True)
         except Exception: return

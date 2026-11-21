@@ -972,7 +972,7 @@ final class FacadeTool implements Listener, TabExecutor {
             if (pl.pilotRoads.contains(p)) return "accepted pilot road (protected)";
             Placement l = latest(w, p);
             if (l != null && !OWNABLE.contains(l.content()))
-                return l.content().startsWith("egg-") ? "Egg work (protected)" : l.content().equals("roads") || l.content().equals("overpass") ? l.content() + " work (protected)" : "legacy tool work without content (protected)";
+                return l.content().startsWith("egg-") ? "Egg work (protected)" : l.content().equals("roads") || l.content().equals("parking") || l.content().equals("overpass") ? l.content() + " work (protected)" : "legacy tool work without content (protected)";
             if (l != null && !members.contains(l.feature())) return "owned by another building (" + l.feature() + ")";
             if (!air(cur.getMaterial())) {
                 if (l == null) return "not owned (terrain or existing build)";

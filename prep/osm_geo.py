@@ -11,7 +11,7 @@ def load(path):
         t = w.get('tags') or {}; pts = [nodes[n] for n in w['nodes'] if n in nodes]
         if len(pts) < 2: continue
         closed = w['nodes'][0] == w['nodes'][-1] and len(pts) >= 4
-        if ('building' in t or 'building:part' in t or 'area:highway' in t) and closed:
+        if ('building' in t or 'building:part' in t or 'area:highway' in t or t.get('amenity') == 'parking') and closed:
             feats.append(dict(id=f"w{w['id']}", tags=t, geom=Polygon(pts)))
         elif 'highway' in t:
             feats.append(dict(id=f"w{w['id']}", tags=t, geom=Polygon(pts) if (closed and t.get('area') == 'yes') else LineString(pts)))

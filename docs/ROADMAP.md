@@ -39,7 +39,7 @@
 
 ## Later
 - [ ] Heights outside the US: building heights from OSM `height` / `building:levels` tags, and other national LiDAR or DSM sources.
-- [ ] More content types: parking lots and other ground textures. Trees and landuse are in v0.5 Egg.
+- [x] Parking lots (v0.7.0). - [ ] Other ground textures. Trees and landuse are in v0.5 Egg.
 - [ ] Builder workflow: claim a chunk or area, give review status, and export a progress map.
 
 ## Not planned

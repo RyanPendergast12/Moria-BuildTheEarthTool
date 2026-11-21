@@ -62,8 +62,8 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
     static final Set<String> OV_ROLES = Set.of("deck", "deck-soffit", "parapet", "median", "abutment", "pier", "approach-fill", "approach-wall", "approach-surface", "approach-barrier", "retire");
     static final Set<String> OV_WALL_ROLES = Set.of("abutment", "pier", "approach-fill", "approach-wall");            // built top-down to the real ground
     /** derived plans from any other preparation pipeline are re-prepared (old cached geometry cannot hide fixes) */
-    static final String PIPELINE = "shelltool_prep v4.3";
-    static String contentOf(Seg s) { return s.mode() == 'R' ? "roads" : OV_ROLES.contains(s.role()) ? "overpass" : "shells"; }
+    static final String PIPELINE = "shelltool_prep v4.4";
+    static String contentOf(Seg s) { return s.mode() == 'R' ? (s.role().startsWith("parking") ? "parking" : "roads") : OV_ROLES.contains(s.role()) ? "overpass" : "shells"; }
 
     private double[] stripPoly, coverPoly;
     private final Map<Long, List<Seg>> accepted = new HashMap<>();
@@ -770,9 +770,9 @@ public final class ShellToolPlugin extends JavaPlugin implements Listener, TabEx
             try (Writer wr = Files.newBufferedWriter(new File(dir, "job-" + id + ".json").toPath(), StandardCharsets.UTF_8)) { new GsonBuilder().setPrettyPrinting().create().toJson(r, wr); }
             catch (IOException ex) { getLogger().warning("report write failed: " + ex); }
             StringBuilder sb = new StringBuilder();
-            for (String c : List.of("shells", "roads", "overpass")) {
-                if (!(c.equals("shells") ? content.shells() : c.equals("roads") ? content.roads() : ovOn(content))) continue;
-                int[] v = byContent.getOrDefault(c, new int[4]); String st = c.equals("shells") ? shellStatus : c.equals("roads") ? roadStatus : overpassStatus;
+            for (String c : List.of("shells", "roads", "parking", "overpass")) {      // parking (v0.7) is prepared with the roads
+                if (!(c.equals("shells") ? content.shells() : c.equals("roads") || c.equals("parking") ? content.roads() : ovOn(content))) continue;
+                int[] v = byContent.getOrDefault(c, new int[4]); String st = c.equals("shells") ? shellStatus : c.equals("roads") || c.equals("parking") ? roadStatus : overpassStatus;
                 sb.append(sb.length() == 0 ? "" : " | ").append(c).append(" ").append(st).append(": ").append(v[0]).append(mode == Mode.APPLY ? " placed" : " would place")
                   .append(", ").append(v[1]).append(" present, ").append(v[2]).append(" protected").append(v[3] > 0 ? ", " + v[3] + " upgraded" : "");
             }
